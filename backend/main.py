@@ -296,6 +296,14 @@ def init_db():
                 except Exception:
                     pass
 
+        # bookings: notes column
+        bk_cols = {r[1] for r in c.execute('PRAGMA table_info(bookings)')}
+        if 'notes' not in bk_cols:
+            try:
+                c.execute('ALTER TABLE bookings ADD COLUMN notes TEXT')
+            except Exception:
+                pass
+
         # 3. Upgrade legacy demo passwords → PBKDF2
         sha256_old = hashlib.sha256(b'demo1234').hexdigest()
         for old in (sha256_old, 'demo1234'):
@@ -481,8 +489,9 @@ class RegisterIn(BaseModel):
 
 class BookingIn(BaseModel):
     caretaker_id: int
-    service_type: str = Field(..., min_length=1, max_length=128)
-    scheduled_at: Optional[str] = None
+    service_type: str  = Field(..., min_length=1, max_length=128)
+    scheduled_at: Optional[str] = None   # ISO datetime string
+    notes:        Optional[str] = Field(default=None, max_length=500)
 
 
 class BookingStatusIn(BaseModel):
@@ -751,6 +760,31 @@ def recommendations(top_k: int = 8, user=Depends(get_user)):
     return {'recommendations': out}
 
 
+_CATEGORY_TH = {
+    'exercise':  'ออกกำลังกาย',
+    'cognitive': 'ฝึกสมอง',
+    'social':    'กิจกรรมกลุ่ม',
+    'art':       'ศิลปะ',
+    'music':     'ดนตรี',
+    'nature':    'ธรรมชาติ',
+    'cooking':   'ทำอาหาร',
+    'games':     'เกม',
+    'reading':   'อ่านหนังสือ',
+    'spiritual': 'จิตใจ',
+}
+_DIFFICULTY_TH = {'easy': 'ง่าย', 'medium': 'ปานกลาง', 'hard': 'ท้าทาย'}
+
+def _benefit_label(val: float) -> str:
+    if val >= 0.45: return 'สูงมาก — ช่วยกระตุ้นสมองได้ดีเยี่ยม'
+    if val >= 0.30: return 'ดี — ช่วยฝึกความจำและสมาธิ'
+    return 'ปานกลาง — เหมาะสำหรับการผ่อนคลาย'
+
+def _sim_label(sim: float) -> str:
+    if sim >= 0.65: return 'เหมาะกับคุณมาก — ตรงกับกิจกรรมที่คุณชอบ'
+    if sim >= 0.40: return 'น่าสนใจ — ใกล้เคียงกับสิ่งที่คุณเคยทำ'
+    if sim >= 0.15: return 'น่าลอง — อาจค้นพบสิ่งใหม่ที่คุณชอบ'
+    return 'แนะนำให้ลองดู — อาจเป็นประสบการณ์ใหม่ที่ดี'
+
 @app.get('/explain/{activity_id}')
 def explain(activity_id: int, user=Depends(get_user)):
     if user['role'] != 'elderly':
@@ -761,18 +795,22 @@ def explain(activity_id: int, user=Depends(get_user)):
     me_idx = user['elderly_id']
     if me_idx is None or me_idx < 0 or me_idx >= len(SEED_USERS):
         raise HTTPException(400, 'Invalid user profile')
-    seed = SEED_USERS[me_idx]
+    seed     = SEED_USERS[me_idx]
+    cat_th   = _CATEGORY_TH.get(a['category'], a['category'])
+    diff_th  = _DIFFICULTY_TH.get(a['difficulty'], a['difficulty'])
+    ben_lbl  = _benefit_label(float(a['cognitive_benefit']))
     expl = [
-        f"กิจกรรม '{a['name_th']}' (หมวด {a['category']}) เหมาะสมเพราะ:",
-        f"  - ระดับความยาก: {a['difficulty']} เหมาะกับช่วงวัย {seed['age']} ปี",
-        f"  - cognitive_benefit = {a['cognitive_benefit']} (ระดับสูงช่วยกระตุ้นสมอง)",
-        f"  - ใช้เวลา {a['duration_min']} นาที ทำได้ที่บ้าน",
+        f"ระบบเลือกกิจกรรม '{a['name_th']}' มาให้คุณโดยเฉพาะ เพราะ:",
+        f"📂 เป็นกิจกรรมประเภท{cat_th} เหมาะสำหรับผู้สูงอายุ",
+        f"💪 ระดับ{diff_th} — เหมาะกับช่วงวัย {seed['age']} ปี",
+        f"🧠 ประโยชน์ต่อสมอง: {ben_lbl}",
+        f"⏱ ใช้เวลาเพียง {a['duration_min']} นาที ทำได้ที่บ้าน",
     ]
     if USER_EMB is not None:
         u_vec = USER_EMB[me_idx]
         i_vec = ITEM_EMB[activity_id]
         sim   = float(np.dot(u_vec, i_vec) / (np.linalg.norm(u_vec) * np.linalg.norm(i_vec) + 1e-9))
-        expl.append(f"  - Bi-Level GAT cosine similarity = {sim:.3f}")
+        expl.append(f"❤️ ความเหมาะสมกับคุณ: {_sim_label(sim)}")
     return {'activity': a['name_th'], 'explanation': expl}
 
 
@@ -878,6 +916,8 @@ def caretakers_match(top_k: int = 5, max_km: float = 30.0, user=Depends(get_user
             'distance_km':  round(d, 2),
             'province':     c['province'],
             'district':     c['district'],
+            'lat':          float(c['lat']) if c.get('lat') else None,
+            'lon':          float(c['lon']) if c.get('lon') else None,
             'match_score':  round(score, 3),
         })
 
@@ -918,6 +958,8 @@ def caretakers_match(top_k: int = 5, max_km: float = 30.0, user=Depends(get_user
             'distance_km':  round(d_km, 2),
             'province':     r['province'] or '',
             'district':     r['district'] or '',
+            'lat':          float(r['lat']),
+            'lon':          float(r['lon']),
             'match_score':  round(score, 3),
         })
 
@@ -1005,9 +1047,9 @@ def create_booking(body: BookingIn, user=Depends(get_user)):
     eid = _eid_for_user(user)
     with db_conn() as conn:
         cur = conn.execute(
-            "INSERT INTO bookings (elderly_id, caretaker_id, service_type, scheduled_at, status)"
-            " VALUES (?,?,?,?,'pending')",
-            (eid, body.caretaker_id, body.service_type, body.scheduled_at),
+            "INSERT INTO bookings (elderly_id, caretaker_id, service_type, scheduled_at, notes, status)"
+            " VALUES (?,?,?,?,?,'pending')",
+            (eid, body.caretaker_id, body.service_type, body.scheduled_at, body.notes),
         )
         bid = cur.lastrowid
         conn.commit()

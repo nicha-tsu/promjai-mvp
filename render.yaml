@@ -20,7 +20,8 @@ services:
         # Or set manually: https://your-app.onrender.com
         generateValue: false
         value: "https://promjai-api.onrender.com"
-    # Persistent disk (requires paid plan — comment out for free tier)
+    # Persistent disk — requires Starter plan ($7/mo) or above
+    # Uncomment the 4 lines below ONLY if you are on a paid plan:
     # disk:
     #   name: promjai-db
     #   mountPath: /data
