@@ -1,0 +1,11 @@
+{
+  "name": "พร้อมใจ ใกล้บ้าน",
+  "short_name": "PromjaiKB",
+  "description": "Mobile recommender + caretaker matching for elderly",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f9fa",
+  "theme_color": "#1f4e79",
+  "lang": "th",
+  "icons": []
+}

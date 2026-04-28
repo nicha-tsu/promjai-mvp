@@ -1,0 +1,24 @@
+{
+  "dataset": "synthetic",
+  "n_users": 200,
+  "n_items": 100,
+  "n_train": 4000,
+  "n_test": 1000,
+  "MF": {
+    "RMSE": 0.6652
+  },
+  "GCN": {
+    "RMSE": 0.7624
+  },
+  "BiLevelGAT": {
+    "RMSE": 0.7539,
+    "NDCG@5": 0.2048,
+    "NDCG@10": 0.2459,
+    "NDCG@20": 0.2963,
+    "HR@10": 0.4899
+  },
+  "improvement": {
+    "rmse_reduction_vs_MF_pct": -13.33,
+    "rmse_reduction_vs_GCN_pct": 1.12
+  }
+}

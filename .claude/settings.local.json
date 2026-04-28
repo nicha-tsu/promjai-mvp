@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.\\(py|js|html|json|sql|txt|md|yml|yaml\\)$\")",
+      "Bash(pip show *)",
+      "Bash(python -c ' *)",
+      "Bash(python -c \"import backend.main; print\\('✓ Import OK'\\)\")",
+      "Bash(uvicorn backend.main:app --port 8000 --log-level warning)",
+      "Bash(curl -s http://localhost:8000/health)",
+      "Bash(python -m json.tool)",
+      "Bash(python -m uvicorn backend.main:app --port 8000 --log-level warning)",
+      "PowerShell(Get-NetTCPConnection -LocalPort 8000 -ErrorAction SilentlyContinue | Select-Object LocalAddress, LocalPort, OwningProcess | ForEach-Object { $proc = Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue; [PSCustomObject]@{Port=$_.LocalPort; PID=$_.OwningProcess; Name=$proc.Name} })",
+      "Bash(netstat -ano)",
+      "Bash(python -m uvicorn backend.main:app --port 8002 --log-level warning)",
+      "Bash(curl -s http://localhost:8002/health)",
+      "Bash(curl -s http://localhost:8003/health)",
+      "Bash(python \"D:/0-Cowork/promjai-mvp/backend/../backend/main.py\")",
+      "Read(//mnt/d/0-Cowork/**)",
+      "Bash(python -m uvicorn backend.main:app --port 8003 --log-level warning)",
+      "Bash(echo \"Server started, PID=$!\")",
+      "Read(//mnt/**)",
+      "Read(//d//**)",
+      "Bash(wslpath \"D:\\\\0-Cowork\\\\promjai-mvp\")",
+      "PowerShell(Start-Process python -ArgumentList \"-m uvicorn backend.main:app --port 8003 --log-level warning\" -WorkingDirectory \"D:\\\\0-Cowork\\\\promjai-mvp\" -PassThru)",
+      "Bash(git -C D:\\\\0-Cowork\\\\promjai-mvp log --oneline -5)"
+    ]
+  }
+}

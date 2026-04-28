@@ -1,0 +1,10 @@
+# Core API
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.9.0
+python-multipart>=0.0.9
+
+# ML / numerics
+numpy>=1.26.4
+
+# All security features (PBKDF2, HMAC, secrets) use Python stdlib — no extra deps needed.

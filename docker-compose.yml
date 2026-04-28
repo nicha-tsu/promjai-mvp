@@ -1,0 +1,27 @@
+version: '3.9'
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - promjai-data:/data          # persistent: DB + logs
+      - ./data:/app/data            # seed CSV/embeddings (read-only OK)
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DB_PATH=/data/promjai.db
+      - LOG_DIR=/data/logs
+      # Override with your public domain when exposing externally:
+      # - ALLOWED_ORIGINS=https://yourdomain.com
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  promjai-data:
+    driver: local

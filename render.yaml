@@ -1,0 +1,27 @@
+# Render.com deployment — https://render.com/docs/render-yaml
+# Push this repo to GitHub, then on Render: New → Blueprint → select repo
+
+services:
+  - type: web
+    name: promjai-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free                  # upgrade to 'starter' for always-on + disk
+    healthCheckPath: /health
+    envVars:
+      - key: DB_PATH
+        value: /data/promjai.db
+      - key: LOG_DIR
+        value: /data/logs
+      - key: TOKEN_TTL_HOURS
+        value: "24"
+      - key: ALLOWED_ORIGINS
+        # Will be set automatically to your Render URL after first deploy.
+        # Or set manually: https://your-app.onrender.com
+        generateValue: false
+        value: "https://promjai-api.onrender.com"
+    # Persistent disk (requires paid plan — comment out for free tier)
+    # disk:
+    #   name: promjai-db
+    #   mountPath: /data
+    #   sizeGB: 1

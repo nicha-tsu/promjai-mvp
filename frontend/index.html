@@ -1,0 +1,1027 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+<meta name="theme-color" content="#1f4e79">
+<title>พร้อมใจ ใกล้บ้าน</title>
+<link rel="manifest" href="/static/manifest.webmanifest">
+<style>
+:root {
+  --primary: #1f4e79;
+  --primary-light: #2e75b6;
+  --accent: #c0392b;
+  --bg: #f8f9fa;
+  --surface: #ffffff;
+  --text: #1a1a1a;
+  --muted: #555555;
+  --border: #d4d4d4;
+  --success: #1e7e34;
+  --warning: #d97706;
+  --danger: #b91c1c;
+  --gap: 16px;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  font-family: 'Sarabun', 'TH Sarabun New', system-ui, sans-serif;
+  font-size: 20px; line-height: 1.55;
+  color: var(--text); background: var(--bg);
+}
+.container { max-width: 720px; margin: 0 auto; padding: 16px; }
+header {
+  background: var(--primary); color: white; padding: 16px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+header h1 { margin: 0; font-size: 22px; font-weight: 700; }
+header .role-badge {
+  background: rgba(255,255,255,0.2); padding: 4px 10px;
+  border-radius: 16px; font-size: 14px;
+}
+button, .btn {
+  font-family: inherit; font-size: 18px;
+  min-height: 50px; padding: 12px 20px;
+  border: 2px solid transparent; border-radius: 10px;
+  cursor: pointer; background: var(--primary); color: white;
+  font-weight: 600;
+}
+button:hover { background: var(--primary-light); }
+button.secondary { background: white; color: var(--primary); border-color: var(--primary); }
+button.danger  { background: var(--danger); }
+button.success { background: var(--success); }
+button.icon-btn { padding: 8px 14px; min-height: 42px; font-size: 16px; }
+button:focus, input:focus, select:focus, textarea:focus {
+  outline: 3px solid #ffd54f; outline-offset: 2px;
+}
+input, select, textarea {
+  font-family: inherit; font-size: 18px; padding: 12px;
+  border: 2px solid var(--border); border-radius: 8px; width: 100%;
+}
+label { display: block; margin-top: 12px; font-weight: 600; }
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 18px; margin-bottom: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.card h3 { margin: 0 0 8px 0; color: var(--primary); }
+.muted { color: var(--muted); font-size: 16px; }
+.tabs {
+  display: flex; gap: 4px; padding: 8px;
+  background: white; border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 5;
+}
+.tabs button {
+  flex: 1; min-height: 56px; font-size: 17px;
+  background: transparent; color: var(--text); border: 2px solid transparent;
+}
+.tabs button.active { background: var(--primary); color: white; }
+.hidden { display: none !important; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.kv { display: grid; grid-template-columns: 140px 1fr; gap: 6px 12px; margin: 10px 0; }
+.kv b { color: var(--muted); }
+.badge { padding: 4px 10px; border-radius: 14px; font-size: 14px; font-weight: 600; }
+.badge.green  { background: #d4edda; color: #155724; }
+.badge.yellow { background: #fff3cd; color: #856404; }
+.badge.red    { background: #f8d7da; color: #721c24; }
+.badge.blue   { background: #cce5ff; color: #004085; }
+.list-empty { text-align: center; padding: 40px 20px; color: var(--muted); }
+.qol-row {
+  display: grid; grid-template-columns: 140px 1fr 50px;
+  gap: 8px; margin: 10px 0; align-items: center;
+}
+.qol-row input[type=range] { width: 100%; }
+.tag {
+  display: inline-block; padding: 3px 10px; margin: 2px;
+  background: #e3f2fd; color: var(--primary);
+  border-radius: 12px; font-size: 14px;
+}
+.metric-card {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: white; padding: 18px; border-radius: 12px; margin-bottom: 14px;
+}
+.metric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
+.metric-grid .v { font-size: 22px; font-weight: 700; }
+.metric-grid .l { font-size: 13px; opacity: 0.9; }
+.toast {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  background: var(--text); color: white; padding: 14px 24px;
+  border-radius: 30px; z-index: 100; font-size: 17px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.score-bar {
+  height: 8px; background: #e0e0e0; border-radius: 4px;
+  overflow: hidden; margin-top: 6px;
+}
+.score-bar div { height: 100%; background: var(--primary-light); }
+.form-tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+.form-tabs button {
+  flex: 1; min-height: 44px; font-size: 16px;
+  background: transparent; color: var(--primary);
+  border: 2px solid var(--border); border-radius: 8px;
+}
+.form-tabs button.active { background: var(--primary); color: white; border-color: var(--primary); }
+details > summary {
+  cursor: pointer; font-weight: 600; color: var(--primary);
+  padding: 8px 0; list-style: none;
+}
+details > summary::before { content: '▶ '; font-size: 13px; }
+details[open] > summary::before { content: '▼ '; }
+@media (max-width: 480px) {
+  html, body { font-size: 19px; }
+  .kv { grid-template-columns: 110px 1fr; font-size: 16px; }
+  .tabs button { font-size: 15px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== Login / Register ===== -->
+<div id="login-screen" class="container">
+  <h1 style="color: var(--primary); margin-top: 40px;">🤝 พร้อมใจ ใกล้บ้าน</h1>
+  <p class="muted" style="font-size: 18px;">
+    บริการดูแลรายบุคคลจากคนในพื้นที่ ผ่านการรับรองมาตรฐาน<br>
+    ขับเคลื่อนด้วย Bi-Level Graph Attention Network
+  </p>
+
+  <div class="card">
+    <div class="form-tabs">
+      <button class="active" id="tab-login-btn"
+              onclick="switchAuthTab('login')">เข้าสู่ระบบ</button>
+      <button id="tab-reg-btn"
+              onclick="switchAuthTab('register')">สมัครสมาชิก</button>
+    </div>
+
+    <!-- ── Login ── -->
+    <div id="login-form">
+      <label for="loginUser">ชื่อผู้ใช้</label>
+      <input id="loginUser" placeholder="เช่น elder1 หรือ care1"
+             onkeydown="if(event.key==='Enter') doLogin()">
+      <label for="loginPass">รหัสผ่าน</label>
+      <input id="loginPass" type="password" placeholder="••••••••"
+             onkeydown="if(event.key==='Enter') doLogin()">
+      <div style="margin-top: 14px;">
+        <button onclick="doLogin()" style="width: 100%;">เข้าสู่ระบบ</button>
+      </div>
+      <p class="muted" style="margin-top: 12px; font-size: 15px;">
+        บัญชีทดลอง: <code>elder1</code> / <code>demo1234</code> &nbsp;|&nbsp;
+        <code>care1</code> / <code>demo1234</code>
+      </p>
+    </div>
+
+    <!-- ── Register ── -->
+    <div id="register-form" class="hidden">
+      <label for="regUser">ชื่อผู้ใช้ (3–50 ตัวอักษร)</label>
+      <input id="regUser" placeholder="username">
+      <label for="regPass">รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)</label>
+      <input id="regPass" type="password" placeholder="••••••••">
+      <label for="regRole">บทบาท</label>
+      <select id="regRole" onchange="toggleRegFields()">
+        <option value="elderly">ผู้สูงอายุ</option>
+        <option value="caretaker">ผู้ดูแล</option>
+      </select>
+      <label for="regName">ชื่อ–นามสกุล</label>
+      <input id="regName" placeholder="ชื่อเต็ม">
+
+      <label style="margin-top: 12px;">วัน / เดือน / ปีเกิด (พ.ศ.)</label>
+      <div class="row" style="gap: 8px; margin-top: 4px;">
+        <select id="regDay"   style="flex: 0 0 72px;"></select>
+        <select id="regMonth" style="flex: 1 1 0;"></select>
+        <select id="regYear"  style="flex: 0 0 96px;"></select>
+      </div>
+
+      <label style="margin-top: 12px;">เพศ</label>
+      <select id="regGender">
+        <option value="M">ชาย</option>
+        <option value="F">หญิง</option>
+        <option value="other">อื่นๆ</option>
+      </select>
+      <label for="regProvince">จังหวัด</label>
+      <input id="regProvince" placeholder="เช่น สงขลา"
+             oninput="onProvinceInput('reg')">
+      <label for="regDistrict">อำเภอ</label>
+      <input id="regDistrict" placeholder="เช่น หาดใหญ่">
+      <label for="regPhone">เบอร์โทร (ไม่บังคับ)</label>
+      <input id="regPhone" type="tel" placeholder="08x-xxx-xxxx">
+
+      <!-- Caretaker-only fields -->
+      <div id="caretaker-fields" class="hidden">
+        <label for="regSkills">ทักษะ (คั่นด้วย |)</label>
+        <input id="regSkills" placeholder="ดูแลผู้สูงอายุ|ทำอาหาร|พยาบาล">
+        <label for="regRate">ค่าบริการ (บาท/ชม.)</label>
+        <input id="regRate" type="number" min="0" placeholder="150">
+        <details style="margin-top: 12px;">
+          <summary>📍 พิกัดแผนที่ (ไม่บังคับ)</summary>
+          <p class="muted" style="margin: 6px 0; font-size: 15px;">
+            💡 หากไม่กรอก ระบบจะใช้พิกัดกลางจังหวัดอัตโนมัติ
+          </p>
+          <div class="row" style="gap: 12px;">
+            <div style="flex: 1;">
+              <label for="regLat">Latitude</label>
+              <input id="regLat" type="number" step="0.0001" placeholder="7.1234">
+            </div>
+            <div style="flex: 1;">
+              <label for="regLon">Longitude</label>
+              <input id="regLon" type="number" step="0.0001" placeholder="100.5678">
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div style="margin-top: 16px;">
+        <button onclick="doRegister()" style="width: 100%;">สมัครสมาชิก</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="background: #fff8e1; border-color: #ffd54f;">
+    <h3 style="color: var(--warning);">📊 ข้อมูลโมเดลปัจจุบัน</h3>
+    <div id="model-info" class="muted">กำลังโหลด...</div>
+  </div>
+</div>
+
+<!-- ===== Main app ===== -->
+<div id="main-app" class="hidden">
+  <header>
+    <h1>🤝 พร้อมใจ ใกล้บ้าน</h1>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <span class="role-badge" id="role-badge">elderly</span>
+      <button class="icon-btn secondary" onclick="doLogout()">ออก</button>
+    </div>
+  </header>
+
+  <!-- Tabs for elderly -->
+  <div class="tabs" id="elderly-tabs">
+    <button class="active" data-tab="recommend">🎯 แนะนำ</button>
+    <button data-tab="caretaker">👥 ผู้ดูแล</button>
+    <button data-tab="qol">📈 คุณภาพชีวิต</button>
+  </div>
+  <!-- Tabs for caretaker -->
+  <div class="tabs hidden" id="caretaker-tabs">
+    <button class="active" data-tab="my-bookings">📋 งานของฉัน</button>
+    <button data-tab="all-caretakers">📂 ทั้งหมด</button>
+    <button data-tab="profile">👤 โปรไฟล์</button>
+  </div>
+
+  <div class="container">
+
+    <!-- ELDERLY: Recommendations -->
+    <section id="tab-recommend" class="tab-pane">
+      <div class="metric-card">
+        <h3 style="margin:0;color:white;">🌟 กิจกรรมแนะนำสำหรับคุณ</h3>
+        <p style="margin:6px 0 0;opacity:.95;">
+          แนะนำโดย Bi-Level GAT — เรียนรู้จากเพื่อนใกล้ตัว + กิจกรรมที่คุณชอบ
+        </p>
+      </div>
+      <div id="rec-list" class="list-empty">กำลังโหลดคำแนะนำ...</div>
+    </section>
+
+    <!-- ELDERLY: Caretaker match -->
+    <section id="tab-caretaker" class="tab-pane hidden">
+      <div class="card">
+        <h3>🔍 ค้นหาผู้ดูแลใกล้บ้าน</h3>
+        <p class="muted">ระบบจะแสดงผู้ดูแลในรัศมี 50 กม. เรียงตามคะแนน + ระยะทาง + การรับรอง</p>
+        <button onclick="loadCaretakers()" style="margin-top:8px;">ค้นหาตอนนี้</button>
+      </div>
+      <!-- Location setup card (shown when no location is set) -->
+      <div id="location-setup" class="card hidden" style="border-color: var(--warning);">
+        <h3 style="color: var(--warning);">📍 ตั้งค่าที่อยู่ก่อนใช้งาน</h3>
+        <p class="muted">กรอกจังหวัดเพื่อให้ระบบค้นหาผู้ดูแลในพื้นที่ของคุณได้</p>
+        <label for="locProvince">จังหวัด</label>
+        <input id="locProvince" placeholder="เช่น เชียงใหม่"
+               onkeydown="if(event.key==='Enter') saveLocation()">
+        <button onclick="saveLocation()" style="margin-top:10px;width:100%;">
+          บันทึกที่อยู่ &amp; ค้นหา
+        </button>
+      </div>
+      <div id="caretaker-list" class="list-empty">กดปุ่ม "ค้นหาตอนนี้" เพื่อแสดงรายการ</div>
+    </section>
+
+    <!-- ELDERLY: QoL -->
+    <section id="tab-qol" class="tab-pane hidden">
+      <div class="card">
+        <h3>📋 บันทึก WHOQOL-BREF (4 ด้าน)</h3>
+        <p class="muted">ประเมินความรู้สึกของคุณในแต่ละด้าน 0–100 คะแนน</p>
+        <div class="qol-row">
+          <label for="qol-phys">กาย</label>
+          <input type="range" id="qol-phys" min="0" max="100" value="55"
+                 oninput="updRange('qol-phys')">
+          <span id="qol-phys-v">55</span>
+        </div>
+        <div class="qol-row">
+          <label for="qol-psy">ใจ</label>
+          <input type="range" id="qol-psy" min="0" max="100" value="55"
+                 oninput="updRange('qol-psy')">
+          <span id="qol-psy-v">55</span>
+        </div>
+        <div class="qol-row">
+          <label for="qol-soc">สังคม</label>
+          <input type="range" id="qol-soc" min="0" max="100" value="55"
+                 oninput="updRange('qol-soc')">
+          <span id="qol-soc-v">55</span>
+        </div>
+        <div class="qol-row">
+          <label for="qol-env">สภาพแวดล้อม</label>
+          <input type="range" id="qol-env" min="0" max="100" value="55"
+                 oninput="updRange('qol-env')">
+          <span id="qol-env-v">55</span>
+        </div>
+        <button onclick="saveQol()" style="margin-top:12px;">บันทึก</button>
+      </div>
+      <div class="card">
+        <h3>📜 ประวัติ</h3>
+        <div id="qol-history" class="list-empty">ยังไม่มีบันทึก</div>
+      </div>
+    </section>
+
+    <!-- CARETAKER: My Bookings -->
+    <section id="tab-my-bookings" class="tab-pane hidden">
+      <div class="card">
+        <h3>📋 รายการงานของฉัน</h3>
+        <button onclick="loadBookings()">รีเฟรช</button>
+      </div>
+      <div id="caretaker-bookings" class="list-empty">กำลังโหลด...</div>
+    </section>
+
+    <!-- CARETAKER: All caretakers -->
+    <section id="tab-all-caretakers" class="tab-pane hidden">
+      <div class="card">
+        <h3>📂 ผู้ดูแลทั้งหมดในระบบ</h3>
+        <p class="muted">รวม Seed (CSV) + ผู้ดูแลที่สมัครสมาชิกใหม่</p>
+        <button onclick="loadAllCaretakers()">รีเฟรช</button>
+      </div>
+      <div id="all-caretakers-list" class="list-empty">กำลังโหลด...</div>
+    </section>
+
+    <!-- CARETAKER: Profile -->
+    <section id="tab-profile" class="tab-pane hidden">
+      <!-- Current profile display -->
+      <div class="card">
+        <h3>👤 โปรไฟล์ผู้ดูแล</h3>
+        <div id="caretaker-profile" class="list-empty">กำลังโหลด...</div>
+      </div>
+
+      <!-- Edit form -->
+      <div class="card">
+        <h3>✏️ แก้ไขโปรไฟล์</h3>
+        <p class="muted" style="margin-top:0;">เฉพาะช่องที่กรอกจะถูกอัปเดต</p>
+
+        <label for="editSkills">ทักษะ (คั่นด้วย |)</label>
+        <input id="editSkills" placeholder="ดูแลผู้สูงอายุ|ทำอาหาร|พยาบาล">
+
+        <label for="editRate">ค่าบริการ (บาท/ชม.)</label>
+        <input id="editRate" type="number" min="0" placeholder="150">
+
+        <div class="row" style="gap: 12px; margin-top: 12px;">
+          <div style="flex: 1;">
+            <label for="editProvince">จังหวัด</label>
+            <input id="editProvince" placeholder="เช่น สงขลา"
+                   oninput="onProvinceInput('edit')">
+          </div>
+          <div style="flex: 1;">
+            <label for="editDistrict">อำเภอ</label>
+            <input id="editDistrict" placeholder="เช่น หาดใหญ่">
+          </div>
+        </div>
+
+        <label for="editPhone">เบอร์โทร</label>
+        <input id="editPhone" type="tel" placeholder="08x-xxx-xxxx">
+
+        <label for="editBio">แนะนำตัวสั้นๆ</label>
+        <textarea id="editBio" rows="3" placeholder="ประสบการณ์ดูแลผู้สูงอายุ..."></textarea>
+
+        <details style="margin-top: 12px;">
+          <summary>📍 พิกัดแผนที่ (ไม่บังคับ)</summary>
+          <p class="muted" style="margin: 6px 0; font-size: 15px;">
+            💡 กรอกจังหวัดแล้วระบบจะเติมพิกัดกลางจังหวัดอัตโนมัติ
+          </p>
+          <div class="row" style="gap: 12px;">
+            <div style="flex: 1;">
+              <label for="editLat">Latitude</label>
+              <input id="editLat" type="number" step="0.0001" placeholder="7.1234">
+            </div>
+            <div style="flex: 1;">
+              <label for="editLon">Longitude</label>
+              <input id="editLon" type="number" step="0.0001" placeholder="100.5678">
+            </div>
+          </div>
+        </details>
+
+        <button onclick="saveProfile()" style="margin-top:14px;width:100%;">
+          💾 บันทึกโปรไฟล์
+        </button>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+'use strict';
+const API = window.location.origin;
+let TOKEN = null, ROLE = null;
+
+/* ── Helpers ──────────────────────────────────────── */
+function $(id) { return document.getElementById(id); }
+
+/** Escape HTML — prevents XSS when injecting API data into innerHTML */
+function esc(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function toast(msg, dur = 2600) {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), dur);
+}
+
+async function api(path, opts = {}) {
+  opts.headers = Object.assign({'Content-Type': 'application/json'}, opts.headers || {});
+  if (TOKEN) opts.headers['Authorization'] = 'Bearer ' + TOKEN;
+  const res = await fetch(API + path, opts);
+  if (!res.ok) {
+    let msg = `HTTP ${res.status}`;
+    try { const j = await res.json(); msg = j.detail || msg; } catch {}
+    throw new Error(msg);
+  }
+  return res.json();
+}
+
+function updRange(id) { $(id + '-v').textContent = $(id).value; }
+
+/* ── Birthdate dropdowns (วัน/เดือน/ปี พ.ศ.) ──────── */
+(function initBirthdatePicker() {
+  const MONTHS_TH = [
+    'มกราคม','กุมภาพันธ์','มีนาคม','เมษายน',
+    'พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม',
+    'กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม',
+  ];
+  // days
+  const dSel = $('regDay');
+  dSel.innerHTML = '<option value="">วัน</option>';
+  for (let d = 1; d <= 31; d++) {
+    const o = document.createElement('option');
+    o.value = String(d).padStart(2, '0');
+    o.textContent = d;
+    dSel.appendChild(o);
+  }
+  // months
+  const mSel = $('regMonth');
+  mSel.innerHTML = '<option value="">เดือน</option>';
+  MONTHS_TH.forEach((name, i) => {
+    const o = document.createElement('option');
+    o.value = String(i + 1).padStart(2, '0');
+    o.textContent = name;
+    mSel.appendChild(o);
+  });
+  // years — พ.ศ. current−14 down to current−100
+  const ySel  = $('regYear');
+  const curBE = new Date().getFullYear() + 543;
+  ySel.innerHTML = '<option value="">ปี พ.ศ.</option>';
+  for (let y = curBE - 14; y >= curBE - 100; y--) {
+    const o = document.createElement('option');
+    o.value = y;
+    o.textContent = y;
+    ySel.appendChild(o);
+  }
+})();
+
+/* ── Province auto-fill hint ─────────────────────── */
+function onProvinceInput(prefix) {
+  // Just a hint — actual auto-fill happens server-side in PUT /profile / POST /auth/register
+}
+
+/* ── Auth-tab switcher ───────────────────────────── */
+function switchAuthTab(tab) {
+  $('login-form').classList.toggle('hidden',    tab !== 'login');
+  $('register-form').classList.toggle('hidden', tab !== 'register');
+  $('tab-login-btn').classList.toggle('active', tab === 'login');
+  $('tab-reg-btn').classList.toggle('active',   tab === 'register');
+}
+function toggleRegFields() {
+  $('caretaker-fields').classList.toggle('hidden', $('regRole').value !== 'caretaker');
+}
+
+/* ── Login ───────────────────────────────────────── */
+async function doLogin() {
+  const username = $('loginUser').value.trim();
+  const password = $('loginPass').value;
+  if (!username || !password) { toast('กรุณากรอกข้อมูล'); return; }
+  try {
+    const r = await api('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({username, password}),
+    });
+    TOKEN = r.token; ROLE = r.role;
+    localStorage.setItem('promjai_token', TOKEN);
+    localStorage.setItem('promjai_role',  ROLE);
+    showMainApp();
+  } catch (e) { toast('เข้าสู่ระบบไม่สำเร็จ: ' + e.message); }
+}
+
+/* ── Register ────────────────────────────────────── */
+async function doRegister() {
+  const username = $('regUser').value.trim();
+  const password = $('regPass').value;
+  const role     = $('regRole').value;
+  const name     = $('regName').value.trim();
+  const dd       = $('regDay').value;
+  const mm       = $('regMonth').value;
+  const yyBE     = $('regYear').value;
+  const gender   = $('regGender').value;
+
+  if (!username || !password || !name || !dd || !mm || !yyBE) {
+    toast('กรุณากรอกข้อมูลให้ครบ (ชื่อ / วันเกิด)'); return;
+  }
+
+  // Convert พ.ศ. → ค.ศ. and build ISO date
+  const yyCE      = parseInt(yyBE) - 543;
+  const birth_date = `${yyCE}-${mm}-${dd}`;
+
+  // Sanity-check the resulting date
+  const testDate = new Date(birth_date + 'T00:00:00');
+  if (isNaN(testDate) || testDate.getMonth() + 1 !== parseInt(mm)) {
+    toast('วันเกิดไม่ถูกต้อง (เช่น วันที่ 30 กุมภาพันธ์ไม่มีอยู่)'); return;
+  }
+
+  const body = {
+    username, password, role, name, birth_date, gender,
+    province:    $('regProvince').value.trim(),
+    district:    $('regDistrict').value.trim(),
+    phone:       $('regPhone').value.trim()  || null,
+    skills:      role === 'caretaker' ? ($('regSkills').value.trim()    || null) : null,
+    hourly_rate: role === 'caretaker' ? (parseFloat($('regRate').value) || null) : null,
+    lat:         role === 'caretaker' ? (parseFloat($('regLat').value)  || null) : null,
+    lon:         role === 'caretaker' ? (parseFloat($('regLon').value)  || null) : null,
+  };
+  try {
+    await api('/auth/register', {method: 'POST', body: JSON.stringify(body)});
+    toast('สมัครสมาชิกสำเร็จ! 🎉 กรุณาเข้าสู่ระบบ');
+    $('loginUser').value = username;
+    switchAuthTab('login');
+  } catch (e) { toast('สมัครไม่สำเร็จ: ' + e.message); }
+}
+
+/* ── Logout ──────────────────────────────────────── */
+async function doLogout() {
+  try { await api('/auth/logout', {method: 'POST'}); } catch {}
+  TOKEN = null; ROLE = null;
+  localStorage.removeItem('promjai_token');
+  localStorage.removeItem('promjai_role');
+  $('main-app').classList.add('hidden');
+  $('login-screen').classList.remove('hidden');
+}
+
+/* ── Show main app ───────────────────────────────── */
+function showMainApp() {
+  $('login-screen').classList.add('hidden');
+  $('main-app').classList.remove('hidden');
+  $('role-badge').textContent = ROLE === 'elderly' ? 'ผู้สูงอายุ' : 'ผู้ดูแล';
+  _recsLoaded = false;
+  if (ROLE === 'elderly') {
+    $('elderly-tabs').classList.remove('hidden');
+    $('caretaker-tabs').classList.add('hidden');
+    showTab('recommend');
+    loadQolHistory();
+  } else {
+    $('elderly-tabs').classList.add('hidden');
+    $('caretaker-tabs').classList.remove('hidden');
+    showTab('my-bookings');
+    loadProfile();
+  }
+}
+
+/* ── Tab navigation ──────────────────────────────── */
+function showTab(name) {
+  document.querySelectorAll('.tab-pane').forEach(s => s.classList.add('hidden'));
+  $('tab-' + name).classList.remove('hidden');
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector(`[data-tab="${CSS.escape(name)}"]`);
+  if (btn) btn.classList.add('active');
+  if (name === 'recommend')      loadRecommendations();
+  if (name === 'qol')            loadQolHistory();
+  if (name === 'my-bookings')    loadBookings();
+  if (name === 'profile')        loadProfile();
+  if (name === 'all-caretakers') loadAllCaretakers();
+}
+document.querySelectorAll('.tabs button').forEach(b => {
+  b.addEventListener('click', () => showTab(b.dataset.tab));
+});
+
+/* ── Recommendations ─────────────────────────────── */
+let _recsLoaded = false;
+async function loadRecommendations() {
+  if (_recsLoaded) return;
+  _recsLoaded = true;
+  $('rec-list').innerHTML = 'กำลังโหลดคำแนะนำ...';
+  try {
+    const r = await api('/recommendations?top_k=8');
+    if (!r.recommendations.length) {
+      $('rec-list').innerHTML = '<div class="list-empty">ยังไม่มีคำแนะนำ</div>';
+      return;
+    }
+    $('rec-list').innerHTML = r.recommendations.map((rec, i) => `
+      <div class="card">
+        <div class="row" style="justify-content:space-between;">
+          <div><b>${i+1}. ${esc(rec.name)}</b></div>
+          <span class="badge green">คะแนน ${esc(rec.score.toFixed(2))}</span>
+        </div>
+        <div class="muted" style="margin-top:4px;">${esc(rec.description)}</div>
+        <div class="row" style="margin-top:10px;gap:8px;">
+          <span class="tag">หมวด: ${esc(rec.category)}</span>
+          <span class="tag">${esc(rec.difficulty)}</span>
+          <span class="tag">⏱ ${esc(rec.duration_min)} นาที</span>
+          <span class="tag">🧠 benefit ${esc(rec.cognitive_benefit)}</span>
+        </div>
+        <div class="score-bar">
+          <div style="width:${Math.min(100, rec.score * 100)}%;"></div>
+        </div>
+        <div class="row" style="margin-top:12px;">
+          <button class="icon-btn"
+                  data-aid="${esc(rec.activity_id)}" data-r="5"
+                  onclick="rateActivity(this)">👍 ชอบมาก</button>
+          <button class="icon-btn secondary"
+                  data-aid="${esc(rec.activity_id)}" data-r="3"
+                  onclick="rateActivity(this)">👌 พอใช้</button>
+          <button class="icon-btn secondary"
+                  data-aid="${esc(rec.activity_id)}"
+                  onclick="explainActivity(this)">❓ ทำไม?</button>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    _recsLoaded = false;
+    $('rec-list').innerHTML = `<div class="list-empty">ผิดพลาด: ${esc(e.message)}</div>`;
+  }
+}
+
+async function rateActivity(btn) {
+  const aid    = parseInt(btn.dataset.aid);
+  const rating = parseInt(btn.dataset.r);
+  try {
+    await api('/feedback', {method: 'POST', body: JSON.stringify({activity_id: aid, rating})});
+    toast('บันทึกความคิดเห็นแล้ว — ขอบคุณค่ะ 🙏');
+  } catch (e) { toast('ผิดพลาด: ' + e.message); }
+}
+
+async function explainActivity(btn) {
+  const aid = parseInt(btn.dataset.aid);
+  try {
+    const r = await api('/explain/' + aid);
+    alert('🔍 เหตุผลที่แนะนำ "' + r.activity + '"\n\n' + r.explanation.join('\n'));
+  } catch (e) { toast('ผิดพลาด: ' + e.message); }
+}
+
+/* ── Caretaker search (elderly side) ─────────────── */
+async function loadCaretakers() {
+  $('caretaker-list').innerHTML = 'กำลังค้นหา...';
+  $('location-setup').classList.add('hidden');
+  try {
+    const r = await api('/caretakers/match?top_k=5&max_km=50');
+    if (!r.matches.length) {
+      $('caretaker-list').innerHTML =
+        '<div class="list-empty">ไม่พบผู้ดูแลในรัศมี 50 กม.<br>ลองขยายรัศมีหรือรอผู้ดูแลใหม่สมัคร</div>';
+      return;
+    }
+    $('caretaker-list').innerHTML = r.matches.map(c => `
+      <div class="card">
+        <div class="row" style="justify-content:space-between;">
+          <div>
+            <b>${esc(c.name)}</b>
+            ${c.source === 'registered'
+              ? '<span class="badge blue" style="margin-left:6px;font-size:12px;">🆕 ใหม่</span>'
+              : ''}
+          </div>
+          <span class="badge ${c.verified === 'yes' ? 'green' : 'yellow'}">
+            ${c.verified === 'yes' ? '✓ รับรอง' : 'รอตรวจ'}
+          </span>
+        </div>
+        <div class="kv">
+          <b>คะแนนรีวิว</b><span>⭐ ${esc(c.rating)} / 5</span>
+          <b>ระยะทาง</b><span>${esc(c.distance_km)} กม.</span>
+          <b>ค่าบริการ</b><span>${esc(c.hourly_rate)} บาท/ชม.</span>
+          <b>พื้นที่</b><span>อ.${esc(c.district)} จ.${esc(c.province)}</span>
+          <b>Match score</b><span>${esc((c.match_score * 100).toFixed(0))}%</span>
+        </div>
+        <div style="margin-top:6px;">
+          ${c.skills.map(s => `<span class="tag">${esc(s)}</span>`).join('')}
+        </div>
+        <button style="margin-top:12px;"
+                data-cid="${esc(c.caretaker_id)}"
+                data-svc="${esc(c.skills[0] || 'ดูแลผู้สูงอายุ')}"
+                onclick="bookFromBtn(this)">📅 จองบริการ</button>
+      </div>
+    `).join('');
+  } catch (e) {
+    if (e.message && e.message.includes('ยังไม่ได้ตั้งค่าที่อยู่')) {
+      $('caretaker-list').innerHTML = '';
+      $('location-setup').classList.remove('hidden');
+    } else {
+      $('caretaker-list').innerHTML =
+        `<div class="list-empty">ผิดพลาด: ${esc(e.message)}</div>`;
+    }
+  }
+}
+
+async function saveLocation() {
+  const province = $('locProvince').value.trim();
+  if (!province) { toast('กรุณากรอกจังหวัด'); return; }
+  try {
+    await api('/profile', {method: 'PUT', body: JSON.stringify({province})});
+    toast('บันทึกที่อยู่เรียบร้อย ✓');
+    $('location-setup').classList.add('hidden');
+    loadCaretakers();
+  } catch (e) { toast('ผิดพลาด: ' + e.message); }
+}
+
+function bookFromBtn(btn) {
+  book(parseInt(btn.dataset.cid), btn.dataset.svc);
+}
+
+async function book(cid, service) {
+  try {
+    await api('/bookings', {
+      method: 'POST',
+      body: JSON.stringify({caretaker_id: cid, service_type: service}),
+    });
+    toast('จองสำเร็จ! รอผู้ดูแลยืนยัน 📅');
+  } catch (e) { toast('ผิดพลาด: ' + e.message); }
+}
+
+/* ── QoL ─────────────────────────────────────────── */
+async function saveQol() {
+  const body = {
+    physical:      +$('qol-phys').value,
+    psychological: +$('qol-psy').value,
+    social:        +$('qol-soc').value,
+    environment:   +$('qol-env').value,
+  };
+  try {
+    const r = await api('/whoqol', {method: 'POST', body: JSON.stringify(body)});
+    toast('บันทึกแล้ว — คะแนนรวม: ' + r.overall);
+    loadQolHistory();
+  } catch (e) { toast('ผิดพลาด: ' + e.message); }
+}
+
+async function loadQolHistory() {
+  try {
+    const rows = await api('/whoqol/history');
+    if (!rows.length) { $('qol-history').innerHTML = 'ยังไม่มีบันทึก'; return; }
+    $('qol-history').innerHTML = rows.slice(-5).reverse().map(r => `
+      <div class="kv" style="border-bottom:1px dashed var(--border);padding-bottom:8px;">
+        <b>${esc(r.recorded_at.slice(0, 16).replace('T', ' '))}</b>
+        <span>กาย ${esc(r.physical)} | ใจ ${esc(r.psychological)} |
+          สังคม ${esc(r.social)} | สภาพแวดล้อม ${esc(r.environment)}</span>
+      </div>
+    `).join('');
+  } catch (e) {
+    $('qol-history').innerHTML =
+      `<div class="list-empty">ผิดพลาด: ${esc(e.message)}</div>`;
+  }
+}
+
+/* ── Bookings (caretaker view) ───────────────────── */
+const STATUS_LABEL = {
+  pending:   'รอยืนยัน',
+  confirmed: 'ยืนยันแล้ว',
+  completed: 'เสร็จสิ้น',
+  cancelled: 'ยกเลิก',
+};
+const STATUS_CLASS = {
+  pending:   'yellow',
+  confirmed: 'green',
+  completed: 'blue',
+  cancelled: 'red',
+};
+
+async function loadBookings() {
+  try {
+    const rows = await api('/bookings');
+    if (!rows.length) {
+      $('caretaker-bookings').innerHTML = '<div class="list-empty">ยังไม่มีงาน</div>';
+      return;
+    }
+    $('caretaker-bookings').innerHTML = rows.map(r => {
+      const s     = r.status || 'pending';
+      const label = STATUS_LABEL[s] || esc(s);
+      const cls   = STATUS_CLASS[s] || 'yellow';
+      const actions =
+        s === 'pending' ? `
+          <div class="row" style="margin-top:10px;gap:8px;">
+            <button class="icon-btn success"
+                    data-bid="${esc(r.id)}" data-st="confirmed"
+                    onclick="updateStatus(this)">✓ ยืนยันรับงาน</button>
+            <button class="icon-btn danger"
+                    data-bid="${esc(r.id)}" data-st="cancelled"
+                    onclick="updateStatus(this)">✗ ปฏิเสธ</button>
+          </div>` :
+        s === 'confirmed' ? `
+          <div class="row" style="margin-top:10px;gap:8px;">
+            <button class="icon-btn success"
+                    data-bid="${esc(r.id)}" data-st="completed"
+                    onclick="updateStatus(this)">✓ งานเสร็จสิ้น</button>
+          </div>` : '';
+      return `
+        <div class="card">
+          <div class="row" style="justify-content:space-between;">
+            <b>${esc(r.elderly_name || 'ผู้ใช้ #' + r.elderly_id)}</b>
+            <span class="badge ${cls}">${label}</span>
+          </div>
+          <div class="kv">
+            <b>บริการ</b><span>${esc(r.service_type)}</span>
+            <b>วันเวลา</b><span>${esc(r.scheduled_at || '-')}</span>
+            <b>สร้างเมื่อ</b><span>${esc((r.created_at || '').slice(0,16))}</span>
+          </div>
+          ${actions}
+        </div>`;
+    }).join('');
+  } catch (e) {
+    $('caretaker-bookings').innerHTML =
+      `<div class="list-empty">ผิดพลาด: ${esc(e.message)}</div>`;
+  }
+}
+
+async function updateStatus(btn) {
+  const bid = parseInt(btn.dataset.bid);
+  const st  = btn.dataset.st;
+  try {
+    await api(`/bookings/${bid}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({status: st}),
+    });
+    toast('อัปเดตสถานะเรียบร้อย ✓');
+    loadBookings();
+  } catch (e) { toast('ผิดพลาด: ' + e.message); }
+}
+
+/* ── All caretakers (caretaker view) ─────────────── */
+async function loadAllCaretakers() {
+  $('all-caretakers-list').innerHTML = 'กำลังโหลด...';
+  try {
+    const r = await api('/caretakers');
+    if (!r.caretakers.length) {
+      $('all-caretakers-list').innerHTML = '<div class="list-empty">ยังไม่มีผู้ดูแล</div>';
+      return;
+    }
+    $('all-caretakers-list').innerHTML = r.caretakers.map(c => {
+      const verBadge =
+        c.verified === 'yes'     ? '<span class="badge green">✓ รับรอง</span>'  :
+        c.verified === 'pending' ? '<span class="badge yellow">⏳ รอตรวจ</span>' :
+                                   '<span class="badge red">✗ ยังไม่รับรอง</span>';
+      const srcBadge = c.source === 'seed'
+        ? '<span class="badge blue">📌 Seed</span>'
+        : '<span class="badge green">🆕 ใหม่</span>';
+      return `
+        <div class="card">
+          <div class="row" style="justify-content:space-between;gap:6px;flex-wrap:wrap;">
+            <b>${esc(c.name)}</b>
+            <div class="row" style="gap:4px;">${srcBadge} ${verBadge}</div>
+          </div>
+          <div class="kv">
+            <b>คะแนน</b><span>${c.rating !== null && c.rating !== undefined
+              ? '⭐ ' + esc(c.rating)
+              : '— (ยังไม่มีรีวิว)'}</span>
+            <b>ค่าบริการ</b><span>${c.hourly_rate
+              ? esc(c.hourly_rate) + ' บาท/ชม.'
+              : '-'}</span>
+            <b>พื้นที่</b><span>${esc(c.province || '-')}</span>
+            ${c.source === 'registered' ? `
+              <b>พิกัด</b>
+              <span>${c.has_location ? '✓ มีพิกัด (ค้นหาได้)' : '✗ ไม่มีพิกัด'}</span>
+            ` : ''}
+          </div>
+          <div style="margin-top:4px;">
+            ${(c.skills || []).filter(s => s).map(s =>
+              `<span class="tag">${esc(s)}</span>`
+            ).join('')}
+          </div>
+        </div>`;
+    }).join('');
+  } catch (e) {
+    $('all-caretakers-list').innerHTML =
+      `<div class="list-empty">ผิดพลาด: ${esc(e.message)}</div>`;
+  }
+}
+
+/* ── Profile (caretaker view + edit form) ─────────── */
+async function loadProfile() {
+  try {
+    const me = await api('/me');
+    const count = me.rating_count || me.completed_jobs;
+    $('caretaker-profile').innerHTML = `
+      <div class="kv">
+        <b>ชื่อ</b><span>${esc(me.name || '-')}</span>
+        <b>คะแนน</b><span>⭐ ${me.rating !== null && me.rating !== undefined
+          ? esc(me.rating)
+          : '— (ยังไม่มีรีวิว)'} / 5</span>
+        <b>การรับรอง</b>
+        <span>${me.verified === 'yes'
+          ? '<span class="badge green">✓ รับรองแล้ว</span>'
+          : me.verified === 'pending'
+            ? '<span class="badge yellow">⏳ รอตรวจสอบ</span>'
+            : '<span class="badge red">ยังไม่รับรอง</span>'}</span>
+        <b>งานที่เสร็จ</b><span>${esc(me.completed_jobs ?? me.rating_count ?? '-')}</span>
+        <b>ค่าบริการ</b><span>${esc(me.hourly_rate ?? '-')} บาท/ชม.</span>
+        <b>พื้นที่</b>
+        <span>อ.${esc(me.district || '-')} จ.${esc(me.province || '-')}</span>
+        ${me.lat ? `<b>พิกัด</b><span>${esc(me.lat)}, ${esc(me.lon)} ✓</span>` : ''}
+        ${me.bio ? `<b>แนะนำตัว</b><span>${esc(me.bio)}</span>` : ''}
+      </div>
+      <div style="margin-top:8px;">
+        ${(me.skills || []).map(s => `<span class="tag">${esc(s)}</span>`).join('')}
+      </div>
+    `;
+    // Pre-fill edit form
+    if (me.skills)      $('editSkills').value   = Array.isArray(me.skills) ? me.skills.join('|') : me.skills;
+    if (me.hourly_rate) $('editRate').value      = me.hourly_rate;
+    if (me.province)    $('editProvince').value  = me.province;
+    if (me.district)    $('editDistrict').value  = me.district;
+    if (me.phone)       $('editPhone').value     = me.phone;
+    if (me.bio)         $('editBio').value       = me.bio;
+    if (me.lat)         $('editLat').value       = me.lat;
+    if (me.lon)         $('editLon').value       = me.lon;
+  } catch (e) {
+    $('caretaker-profile').innerHTML =
+      `<div class="list-empty">ผิดพลาด: ${esc(e.message)}</div>`;
+  }
+}
+
+async function saveProfile() {
+  const body = {};
+  const skills    = $('editSkills').value.trim();
+  const rate      = $('editRate').value;
+  const province  = $('editProvince').value.trim();
+  const district  = $('editDistrict').value.trim();
+  const phone     = $('editPhone').value.trim();
+  const bio       = $('editBio').value.trim();
+  const latStr    = $('editLat').value.trim();
+  const lonStr    = $('editLon').value.trim();
+
+  if (skills)                    body.skills      = skills;
+  if (rate !== '')               body.hourly_rate  = parseFloat(rate);
+  if (province)                  body.province    = province;
+  if (district)                  body.district    = district;
+  if (phone)                     body.phone       = phone;
+  if (bio)                       body.bio         = bio;
+  if (latStr !== '')             body.lat         = parseFloat(latStr);
+  if (lonStr !== '')             body.lon         = parseFloat(lonStr);
+
+  if (Object.keys(body).length === 0) {
+    toast('กรุณากรอกข้อมูลที่ต้องการแก้ไข'); return;
+  }
+  try {
+    const r = await api('/profile', {method: 'PUT', body: JSON.stringify(body)});
+    toast(`บันทึกสำเร็จ ✓ (อัปเดต: ${r.updated.join(', ')})`);
+    loadProfile();
+  } catch (e) { toast('ผิดพลาด: ' + e.message); }
+}
+
+/* ── Model info (login screen) ───────────────────── */
+async function loadModelInfo() {
+  try {
+    const m = await api('/metrics');
+    if (m.BiLevelGAT) {
+      const reds = m.improvement || {};
+      $('model-info').innerHTML = `
+        <div class="metric-grid">
+          <div><div class="l">RMSE (Bi-Level GAT)</div>
+               <div class="v">${esc(m.BiLevelGAT.RMSE)}</div></div>
+          <div><div class="l">RMSE (MF)</div>
+               <div class="v">${esc(m.MF.RMSE)}</div></div>
+          <div><div class="l">vs MF</div>
+               <div class="v">${esc(reds.rmse_reduction_vs_MF_pct)}%</div></div>
+          <div><div class="l">vs GCN</div>
+               <div class="v">${esc(reds.rmse_reduction_vs_GCN_pct)}%</div></div>
+        </div>`;
+    }
+  } catch { $('model-info').textContent = 'ยังไม่ train โมเดล'; }
+}
+
+/* ── Session restore + token validation ──────────── */
+window.addEventListener('load', async () => {
+  const savedToken = localStorage.getItem('promjai_token');
+  const savedRole  = localStorage.getItem('promjai_role');
+  if (savedToken && savedRole) {
+    TOKEN = savedToken; ROLE = savedRole;
+    try {
+      await api('/me');
+      showMainApp();
+    } catch {
+      TOKEN = null; ROLE = null;
+      localStorage.removeItem('promjai_token');
+      localStorage.removeItem('promjai_role');
+      loadModelInfo();
+    }
+  } else {
+    loadModelInfo();
+  }
+});
+</script>
+</body>
+</html>
