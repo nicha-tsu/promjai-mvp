@@ -916,6 +916,8 @@ def caretakers_match(top_k: int = 5, max_km: float = 30.0, user=Depends(get_user
             'distance_km':  round(d, 2),
             'province':     c['province'],
             'district':     c['district'],
+            'lat':          float(c['lat']) if c.get('lat') else None,
+            'lon':          float(c['lon']) if c.get('lon') else None,
             'match_score':  round(score, 3),
         })
 
@@ -956,6 +958,8 @@ def caretakers_match(top_k: int = 5, max_km: float = 30.0, user=Depends(get_user
             'distance_km':  round(d_km, 2),
             'province':     r['province'] or '',
             'district':     r['district'] or '',
+            'lat':          float(r['lat']),
+            'lon':          float(r['lon']),
             'match_score':  round(score, 3),
         })
 

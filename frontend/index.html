@@ -6,6 +6,9 @@
 <meta name="theme-color" content="#1f4e79">
 <title>พร้อมใจ ใกล้บ้าน</title>
 <link rel="manifest" href="/static/manifest.webmanifest">
+<!-- Leaflet.js map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
 <style>
 /* ══════════════════════════════════════════════════
    CSS CUSTOM PROPERTIES & THEMES
@@ -485,11 +488,65 @@ details[open] > summary::before { content: '▼ '; }
 }
 
 /* ══════════════════════════════════════════════════
-   RESPONSIVE
+   RESPONSIVE — MOBILE
 ══════════════════════════════════════════════════ */
 @media (max-width: 480px) {
   .kv { grid-template-columns: 120px 1fr; font-size: calc(var(--font-base) - 2px); }
 }
+
+/* ══════════════════════════════════════════════════
+   DESKTOP LAYOUT (≥ 768 px) — mobile-app-in-browser
+══════════════════════════════════════════════════ */
+@media (min-width: 768px) {
+  html {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 60%, #5a9fd4 100%);
+    min-height: 100%;
+  }
+  body {
+    max-width: 480px;
+    margin: 0 auto;
+    background: var(--bg);
+    min-height: 100vh;
+    box-shadow: 0 0 60px rgba(0,0,0,.35);
+    position: relative;
+  }
+  /* Toolbar stays within the 480px column */
+  #a11y-toolbar {
+    max-width: 480px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  /* Bottom nav stays within the 480px column */
+  #bottom-nav {
+    max-width: 480px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  /* Toast constrained */
+  .toast {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    right: auto !important;
+    max-width: 420px;
+  }
+  /* Help FAB inside the column */
+  #help-fab {
+    right: calc(50% - 226px);
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   LEAFLET MAP
+══════════════════════════════════════════════════ */
+#caretaker-map {
+  height: 280px;
+  border-radius: var(--radius);
+  margin-top: 16px;
+  display: none;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+#caretaker-map .leaflet-popup-content { font-size: 14px; line-height: 1.6; }
 </style>
 </head>
 <body data-font="1" data-hc="0">
@@ -756,10 +813,16 @@ details[open] > summary::before { content: '▼ '; }
       </select>
 
       <label for="regProvince">จังหวัด</label>
-      <input id="regProvince" placeholder="เช่น สงขลา" autocomplete="address-level1">
+      <select id="regProvince" aria-required="true"
+              onchange="onProvinceChange('reg')" autocomplete="address-level1">
+        <option value="">— เลือกจังหวัด —</option>
+      </select>
 
-      <label for="regDistrict">อำเภอ</label>
-      <input id="regDistrict" placeholder="เช่น หาดใหญ่" autocomplete="address-level2">
+      <label for="regDistrict">อำเภอ / เขต</label>
+      <select id="regDistrict" autocomplete="address-level2"
+              aria-label="เลือกอำเภอ" disabled>
+        <option value="">— เลือกจังหวัดก่อน —</option>
+      </select>
 
       <label for="regPhone">เบอร์โทร (ไม่บังคับ)</label>
       <input id="regPhone" type="tel" placeholder="08x-xxx-xxxx"
@@ -863,6 +926,8 @@ details[open] > summary::before { content: '▼ '; }
           <p>กดปุ่ม "ค้นหาตอนนี้" เพื่อดูผู้ดูแลใกล้บ้าน</p>
         </div>
       </div>
+      <!-- Leaflet map — shows caretaker pins after search -->
+      <div id="caretaker-map" role="region" aria-label="แผนที่ตำแหน่งผู้ดูแล"></div>
     </section>
 
     <!-- ── ELDERLY: QoL ── -->
@@ -1025,17 +1090,18 @@ details[open] > summary::before { content: '▼ '; }
         <label for="editRate">ค่าบริการ (บาท/ชม.)</label>
         <input id="editRate" type="number" min="0" placeholder="150">
 
-        <div class="row" style="gap:12px; margin-top:14px;">
-          <div style="flex:1;">
-            <label for="editProvince">จังหวัด</label>
-            <input id="editProvince" placeholder="เช่น สงขลา"
-                   autocomplete="address-level1">
-          </div>
-          <div style="flex:1;">
-            <label for="editDistrict">อำเภอ</label>
-            <input id="editDistrict" placeholder="เช่น หาดใหญ่"
-                   autocomplete="address-level2">
-          </div>
+        <div style="margin-top:14px;">
+          <label for="editProvince">จังหวัด</label>
+          <select id="editProvince" onchange="onProvinceChange('edit')"
+                  autocomplete="address-level1">
+            <option value="">— เลือกจังหวัด —</option>
+          </select>
+        </div>
+        <div style="margin-top:10px;">
+          <label for="editDistrict">อำเภอ / เขต</label>
+          <select id="editDistrict" autocomplete="address-level2" disabled>
+            <option value="">— เลือกจังหวัดก่อน —</option>
+          </select>
         </div>
 
         <label for="editPhone">เบอร์โทร</label>
@@ -1387,6 +1453,8 @@ function showMainApp() {
   }
   startIdle();
   maybeShowTour();
+  // Load province data for cascading selects
+  initProvinceSelects();
 }
 
 /* ════════════════════════════════════════════════════
@@ -1520,6 +1588,144 @@ function setQol(domain, val) {
     btn.classList.toggle('selected', selected);
     btn.setAttribute('aria-pressed', selected ? 'true' : 'false');
   });
+}
+
+/* ════════════════════════════════════════════════════
+   PROVINCE / DISTRICT CASCADING
+════════════════════════════════════════════════════ */
+let _addressData = null;
+
+async function loadAddressData() {
+  if (_addressData) return _addressData;
+  try {
+    const r = await fetch('/static/thailand-address.json');
+    _addressData = await r.json();
+  } catch {
+    _addressData = [];
+  }
+  return _addressData;
+}
+
+async function initProvinceSelects() {
+  const data = await loadAddressData();
+  ['reg', 'edit'].forEach(pfx => {
+    const sel = $(pfx + 'Province');
+    if (!sel) return;
+    data.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value   = p.name_th;
+      opt.textContent = p.name_th;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+function onProvinceChange(pfx) {
+  const provVal  = $(pfx + 'Province').value;
+  const distSel  = $(pfx + 'District');
+  distSel.innerHTML = '';
+  if (!provVal || !_addressData) {
+    distSel.innerHTML = '<option value="">— เลือกจังหวัดก่อน —</option>';
+    distSel.disabled  = true;
+    return;
+  }
+  const prov = _addressData.find(p => p.name_th === provVal);
+  if (!prov || !prov.districts.length) {
+    distSel.innerHTML = '<option value="">— ไม่พบข้อมูลอำเภอ —</option>';
+    distSel.disabled  = true;
+    return;
+  }
+  distSel.disabled = false;
+  const blank = document.createElement('option');
+  blank.value = ''; blank.textContent = '— เลือกอำเภอ —';
+  distSel.appendChild(blank);
+  prov.districts.forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d.name_th; opt.textContent = d.name_th;
+    distSel.appendChild(opt);
+  });
+}
+
+/** Set province + district selects to saved values (used in loadProfile) */
+function setProvinceDistrict(pfx, province, district) {
+  const provSel = $(pfx + 'Province');
+  if (!provSel) return;
+  provSel.value = province || '';
+  if (province) {
+    onProvinceChange(pfx);
+    setTimeout(() => {
+      const distSel = $(pfx + 'District');
+      if (distSel) distSel.value = district || '';
+    }, 50);
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   LEAFLET MAP — ผู้ดูแลบนแผนที่
+════════════════════════════════════════════════════ */
+let _map = null;
+let _mapMarkers = [];
+
+function renderCaretakerMap(matches, userLat, userLon) {
+  const mapEl = $('caretaker-map');
+  if (!mapEl || typeof L === 'undefined') return;
+
+  const hasPins = matches.some(c => c.lat && c.lon);
+  if (!hasPins && !userLat) { mapEl.style.display = 'none'; return; }
+
+  mapEl.style.display = 'block';
+
+  if (!_map) {
+    _map = L.map('caretaker-map', { zoomControl: true, scrollWheelZoom: false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>',
+      maxZoom: 18,
+    }).addTo(_map);
+  } else {
+    _mapMarkers.forEach(m => _map.removeLayer(m));
+    _mapMarkers = [];
+  }
+
+  const bounds = [];
+
+  // User location marker (blue)
+  if (userLat && userLon) {
+    const youIcon = L.divIcon({
+      html: '<div style="background:#1f4e79;width:14px;height:14px;border-radius:50%;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,.4);"></div>',
+      iconSize: [14, 14], iconAnchor: [7, 7], className: '',
+    });
+    const m = L.marker([userLat, userLon], { icon: youIcon })
+      .bindPopup('<b>📍 ตำแหน่งของคุณ</b>')
+      .addTo(_map);
+    _mapMarkers.push(m);
+    bounds.push([userLat, userLon]);
+  }
+
+  // Caretaker markers
+  matches.forEach(c => {
+    if (!c.lat || !c.lon) return;
+    const stars = '⭐'.repeat(Math.round(c.rating));
+    const popup = `
+      <div style="min-width:160px;">
+        <b>${esc(c.name)}</b><br>
+        ${stars} ${c.rating}/5<br>
+        💰 ${c.hourly_rate} บาท/ชม.<br>
+        📍 ${c.distance_km} กม.
+      </div>`;
+    const careIcon = L.divIcon({
+      html: '<div style="background:#c0392b;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 0 5px rgba(0,0,0,.4);"></div>',
+      iconSize: [12, 12], iconAnchor: [6, 6], className: '',
+    });
+    const m = L.marker([c.lat, c.lon], { icon: careIcon })
+      .bindPopup(popup)
+      .addTo(_map);
+    _mapMarkers.push(m);
+    bounds.push([c.lat, c.lon]);
+  });
+
+  if (bounds.length > 0) {
+    _map.fitBounds(bounds, { padding: [24, 24], maxZoom: 13 });
+  }
 }
 
 /* ════════════════════════════════════════════════════
@@ -1722,6 +1928,9 @@ async function loadCaretakers() {
         </button>
       </div>
     `).join('');
+    // Render map after list
+    const ul = r.user_location || {};
+    renderCaretakerMap(r.matches, ul.lat, ul.lon);
   } catch (e) {
     if (e.message && e.message.includes('ยังไม่ได้ตั้งค่าที่อยู่')) {
       $('caretaker-list').innerHTML = '';
@@ -2057,8 +2266,7 @@ async function loadProfile() {
     `;
     if (me.skills)      $('editSkills').value  = Array.isArray(me.skills) ? me.skills.join('|') : me.skills;
     if (me.hourly_rate) $('editRate').value     = me.hourly_rate;
-    if (me.province)    $('editProvince').value = me.province;
-    if (me.district)    $('editDistrict').value = me.district;
+    if (me.province || me.district) setProvinceDistrict('edit', me.province, me.district);
     if (me.phone)       $('editPhone').value    = me.phone;
     if (me.bio)         $('editBio').value      = me.bio;
     if (me.lat)         $('editLat').value      = me.lat;
