@@ -242,6 +242,34 @@ label {
 }
 .score-bar div { height: 100%; background: var(--primary-light); }
 
+/* ── Radio card (for booking: self / other) ────── */
+.radio-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+.radio-card {
+  flex: 1; min-width: 130px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px;
+  border: 2px solid var(--border); border-radius: var(--radius);
+  cursor: pointer; background: var(--surface);
+  font-size: var(--font-base); transition: border-color .15s, background .15s;
+}
+.radio-card:has(input:checked) {
+  border-color: var(--primary); background: #e8f0fe;
+}
+body[data-hc="1"] .radio-card:has(input:checked) { background: #d0e0ff; }
+.radio-card input[type="radio"] { width: 20px; height: 20px; accent-color: var(--primary); }
+
+/* ── Location button ───────────────────────────── */
+.loc-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-radius: var(--radius);
+  border: 2px solid var(--primary); background: var(--surface);
+  color: var(--primary); font-size: var(--font-base);
+  cursor: pointer; width: 100%; justify-content: center;
+  min-height: var(--target);
+}
+.loc-btn:hover, .loc-btn:focus-visible { background: #e8f0fe; }
+.loc-link { color: var(--primary); font-weight: 600; text-decoration: underline; }
+
 /* ══════════════════════════════════════════════════
    METRIC CARD
 ══════════════════════════════════════════════════ */
@@ -501,6 +529,35 @@ details[open] > summary::before { content: '▼ '; }
     <h2 id="mbooking-title">📅 ยืนยันการจองบริการ</h2>
     <div id="mbooking-body"></div>
 
+    <!-- Who is this booking for -->
+    <label style="margin-top:18px;">👤 จองสำหรับ</label>
+    <div class="radio-group" role="radiogroup" aria-label="เลือกผู้รับบริการ">
+      <label class="radio-card">
+        <input type="radio" name="book-for" id="book-self" value="self"
+               checked onchange="toggleBookFor()"
+               aria-label="ใช้บริการเอง">
+        🧑 ใช้บริการเอง
+      </label>
+      <label class="radio-card">
+        <input type="radio" name="book-for" id="book-other" value="other"
+               onchange="toggleBookFor()"
+               aria-label="จองให้ผู้อื่น">
+        👥 จองให้ผู้อื่น
+      </label>
+    </div>
+
+    <!-- Recipient info (shown only when "จองให้ผู้อื่น") -->
+    <div id="book-for-other" class="hidden" style="margin-top:12px;">
+      <label for="book-recipient-name">ชื่อ-นามสกุล ผู้รับบริการ <span style="color:var(--danger);">*</span></label>
+      <input id="book-recipient-name" type="text"
+             placeholder="เช่น สมชาย ใจดี"
+             aria-required="true">
+      <label for="book-recipient-phone" style="margin-top:10px;">เบอร์โทรศัพท์ผู้รับบริการ</label>
+      <input id="book-recipient-phone" type="tel"
+             placeholder="เช่น 081-234-5678"
+             inputmode="numeric">
+    </div>
+
     <label for="book-date" style="margin-top:18px;">📆 วันที่นัดหมาย</label>
     <input type="date" id="book-date" aria-required="true">
 
@@ -586,7 +643,7 @@ details[open] > summary::before { content: '▼ '; }
   <div class="modal">
     <h2 id="mhelp-title">❓ วิธีใช้งาน</h2>
     <details open>
-      <summary>ผู้สูงอายุ — หาผู้ดูแล</summary>
+      <summary>ผู้รับบริการ — หาผู้ดูแล</summary>
       <p>ไปที่แถบ <b>👥 ผู้ดูแล</b> → กด "ค้นหาตอนนี้" → กด "จองบริการ" หน้าต่างยืนยันจะเปิดขึ้น</p>
     </details>
     <details>
@@ -676,7 +733,7 @@ details[open] > summary::before { content: '▼ '; }
 
       <label for="regRole">บทบาท</label>
       <select id="regRole" onchange="toggleRegFields()" aria-required="true">
-        <option value="elderly">ผู้สูงอายุ</option>
+        <option value="elderly">ผู้รับบริการ / ผู้สูงอายุ</option>
         <option value="caretaker">ผู้ดูแล</option>
       </select>
 
@@ -719,22 +776,20 @@ details[open] > summary::before { content: '▼ '; }
           ระบุราคาที่คุณให้บริการต่อชั่วโมง
         </p>
 
-        <details style="margin-top:14px;">
-          <summary>📍 พิกัดแผนที่ (ไม่บังคับ)</summary>
-          <p class="muted" style="margin:6px 0; font-size:15px;">
-            💡 หากไม่กรอก ระบบจะใช้พิกัดกลางจังหวัดอัตโนมัติ
+        <div style="margin-top:14px;">
+          <label>📍 จุดรับบริการ <span class="muted" style="font-size:0.8em;">(ไม่บังคับ)</span></label>
+          <p class="muted" style="margin:4px 0 10px; font-size:15px;">
+            💡 กดปุ่มด้านล่างเพื่อให้ระบบระบุตำแหน่งของคุณอัตโนมัติ
           </p>
-          <div class="row" style="gap:12px;">
-            <div style="flex:1;">
-              <label for="regLat">Latitude</label>
-              <input id="regLat" type="number" step="0.0001" placeholder="7.1234">
-            </div>
-            <div style="flex:1;">
-              <label for="regLon">Longitude</label>
-              <input id="regLon" type="number" step="0.0001" placeholder="100.5678">
-            </div>
-          </div>
-        </details>
+          <button type="button" class="loc-btn" id="btn-loc-reg"
+                  onclick="useMyLocation('reg')"
+                  aria-label="ใช้ตำแหน่งปัจจุบันเป็นจุดรับบริการ">
+            📍 ใช้ตำแหน่งปัจจุบัน
+          </button>
+          <p id="loc-status-reg" class="muted" style="font-size:14px; margin:8px 0 0; min-height:20px;"></p>
+          <input id="regLat" type="hidden">
+          <input id="regLon" type="hidden">
+        </div>
       </div>
 
       <div style="margin-top:18px;">
@@ -772,7 +827,7 @@ details[open] > summary::before { content: '▼ '; }
       <div class="metric-card">
         <h2 style="margin:0; color:white; font-size:20px;">🌟 กิจกรรมแนะนำสำหรับคุณ</h2>
         <p style="margin:6px 0 0; opacity:.95; font-size:calc(var(--font-base) - 3px);">
-          แนะนำโดย Bi-Level GAT — เรียนรู้จากเพื่อนใกล้ตัว + กิจกรรมที่คุณชอบ
+          ระบบเลือกมาให้คุณโดยเฉพาะ — เรียนรู้จากเพื่อนใกล้ตัว + กิจกรรมที่คุณชอบ
         </p>
       </div>
       <div id="rec-list" aria-live="polite" aria-label="รายการกิจกรรมแนะนำ">
@@ -995,22 +1050,20 @@ details[open] > summary::before { content: '▼ '; }
           ไม่เกิน 1,000 ตัวอักษร
         </p>
 
-        <details style="margin-top:14px;">
-          <summary>📍 พิกัดแผนที่ (ไม่บังคับ)</summary>
-          <p class="muted" style="margin:6px 0; font-size:15px;">
-            💡 กรอกจังหวัดแล้วระบบจะเติมพิกัดกลางจังหวัดอัตโนมัติ
+        <div style="margin-top:14px;">
+          <label>📍 จุดรับบริการ <span class="muted" style="font-size:0.8em;">(ไม่บังคับ)</span></label>
+          <p class="muted" style="margin:4px 0 10px; font-size:15px;">
+            💡 กดปุ่มเพื่ออัปเดตตำแหน่งรับบริการของคุณ
           </p>
-          <div class="row" style="gap:12px;">
-            <div style="flex:1;">
-              <label for="editLat">Latitude</label>
-              <input id="editLat" type="number" step="0.0001" placeholder="7.1234">
-            </div>
-            <div style="flex:1;">
-              <label for="editLon">Longitude</label>
-              <input id="editLon" type="number" step="0.0001" placeholder="100.5678">
-            </div>
-          </div>
-        </details>
+          <button type="button" class="loc-btn" id="btn-loc-edit"
+                  onclick="useMyLocation('edit')"
+                  aria-label="ใช้ตำแหน่งปัจจุบันเป็นจุดรับบริการ">
+            📍 ใช้ตำแหน่งปัจจุบัน
+          </button>
+          <p id="loc-status-edit" class="muted" style="font-size:14px; margin:8px 0 0; min-height:20px;"></p>
+          <input id="editLat" type="hidden">
+          <input id="editLon" type="hidden">
+        </div>
 
         <button onclick="saveProfile()" style="margin-top:16px; width:100%;"
                 aria-label="บันทึกการเปลี่ยนแปลงโปรไฟล์">
@@ -1319,8 +1372,8 @@ function showMainApp() {
   $('login-screen').classList.add('hidden');
   $('main-app').classList.remove('hidden');
   $('help-fab').classList.add('visible');
-  $('role-badge').textContent = ROLE === 'elderly' ? '👴 ผู้สูงอายุ' : '🏥 ผู้ดูแล';
-  $('role-badge').setAttribute('aria-label', ROLE === 'elderly' ? 'บทบาท: ผู้สูงอายุ' : 'บทบาท: ผู้ดูแล');
+  $('role-badge').textContent = ROLE === 'elderly' ? '👴 ผู้รับบริการ' : '🏥 ผู้ดูแล';
+  $('role-badge').setAttribute('aria-label', ROLE === 'elderly' ? 'บทบาท: ผู้รับบริการ' : 'บทบาท: ผู้ดูแล');
   _recsLoaded = false;
 
   if (ROLE === 'elderly') {
@@ -1470,6 +1523,70 @@ function setQol(domain, val) {
 }
 
 /* ════════════════════════════════════════════════════
+   GEOLOCATION — จุดรับบริการ
+════════════════════════════════════════════════════ */
+function useMyLocation(prefix) {
+  const btn      = $('btn-loc-' + prefix);
+  const statusEl = $('loc-status-' + prefix);
+  if (!navigator.geolocation) {
+    statusEl.textContent = '⚠️ เบราว์เซอร์ไม่รองรับการค้นหาตำแหน่ง';
+    return;
+  }
+  btn.disabled    = true;
+  btn.textContent = '⏳ กำลังค้นหาตำแหน่ง...';
+  statusEl.textContent = '';
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude.toFixed(6);
+      const lon = pos.coords.longitude.toFixed(6);
+      $(prefix + 'Lat').value = lat;
+      $(prefix + 'Lon').value = lon;
+      btn.disabled    = false;
+      btn.textContent = '✅ บันทึกตำแหน่งแล้ว';
+      const mapsUrl = `https://www.google.com/maps?q=${lat},${lon}`;
+      statusEl.innerHTML =
+        `📌 พิกัดของคุณ: ${lat}, ${lon} &nbsp;` +
+        `<a class="loc-link" href="${mapsUrl}" target="_blank" rel="noopener noreferrer">` +
+        `🗺 ดูบน Google Maps</a>`;
+    },
+    () => {
+      btn.disabled    = false;
+      btn.textContent = '📍 ใช้ตำแหน่งปัจจุบัน';
+      statusEl.textContent = '⚠️ ไม่สามารถค้นหาตำแหน่งได้ กรุณาอนุญาตการเข้าถึงตำแหน่งในเบราว์เซอร์';
+    }
+  );
+}
+
+/* ════════════════════════════════════════════════════
+   PLAIN-LANGUAGE HELPERS (ภาษาชาวบ้าน)
+════════════════════════════════════════════════════ */
+const DIFFICULTY_TH = { easy: 'ง่าย', medium: 'ปานกลาง', hard: 'ท้าทาย' };
+const CATEGORY_TH   = {
+  exercise:  '🏃 ออกกำลังกาย',
+  cognitive: '🧩 ฝึกสมอง',
+  social:    '👥 กิจกรรมกลุ่ม',
+  art:       '🎨 ศิลปะ',
+  music:     '🎵 ดนตรี',
+  nature:    '🌿 ธรรมชาติ',
+  cooking:   '🍳 ทำอาหาร',
+  games:     '🎮 เกม',
+  reading:   '📚 อ่านหนังสือ',
+  spiritual: '🙏 จิตใจ',
+};
+
+function thaiDifficulty(d) { return DIFFICULTY_TH[d] || d; }
+function thaiCategory(c)   { return CATEGORY_TH[c]   || c; }
+
+/** แปลง score 0-1 → ป้ายภาษาชาวบ้าน */
+function matchLabel(score) {
+  if (score >= 0.65) return '<span class="badge green">🟢 เหมาะกับคุณ</span>';
+  if (score >= 0.40) return '<span class="badge" style="background:#fff3cd;color:#7a4100;border:1px solid #f0a500;">🟠 น่าสนใจ</span>';
+  if (score >= 0.15) return '<span class="badge yellow">🟡 น่าลอง</span>';
+  return '';
+}
+
+/* ════════════════════════════════════════════════════
    RECOMMENDATIONS
 ════════════════════════════════════════════════════ */
 let _recsLoaded = false;
@@ -1492,18 +1609,16 @@ async function loadRecommendations() {
       <div class="card">
         <div class="row" style="justify-content:space-between; flex-wrap:wrap; gap:6px;">
           <b>${i+1}. ${esc(rec.name)}</b>
-          <span class="badge green" aria-label="คะแนนแนะนำ ${rec.score.toFixed(2)}">
-            ⭐ ${esc(rec.score.toFixed(2))}
-          </span>
+          ${matchLabel(rec.score)}
         </div>
         <div class="muted" style="margin-top:6px;">${esc(rec.description)}</div>
         <div class="row" style="margin-top:10px; gap:6px; flex-wrap:wrap;">
-          <span class="tag">📁 ${esc(rec.category)}</span>
-          <span class="tag">${esc(rec.difficulty)}</span>
+          <span class="tag">${thaiCategory(rec.category)}</span>
+          <span class="tag">${thaiDifficulty(rec.difficulty)}</span>
           <span class="tag">⏱ ${esc(rec.duration_min)} นาที</span>
-          <span class="tag">🧠 benefit ${esc(rec.cognitive_benefit)}</span>
+          <span class="tag">🧠 ดีต่อสมอง</span>
         </div>
-        <div class="score-bar" aria-hidden="true">
+        <div class="score-bar" aria-label="ระดับความเหมาะสม" aria-hidden="true">
           <div style="width:${Math.min(100, rec.score * 100)}%;"></div>
         </div>
         <div class="row" style="margin-top:14px; gap:8px; flex-wrap:wrap;">
@@ -1591,7 +1706,7 @@ async function loadCaretakers() {
           <b>📍 ระยะทาง</b><span>${esc(c.distance_km)} กม.</span>
           <b>💰 ค่าบริการ</b><span>${esc(c.hourly_rate)} บาท/ชม.</span>
           <b>📌 พื้นที่</b><span>อ.${esc(c.district)} จ.${esc(c.province)}</span>
-          <b>🎯 ความเหมาะสม</b><span>${esc((c.match_score * 100).toFixed(0))}%</span>
+          <b>🎯 ระบบเลือกมาให้</b><span>${matchLabel(c.match_score)}</span>
         </div>
         <div style="margin:6px 0;">
           ${c.skills.map(s => `<span class="tag">${esc(s)}</span>`).join('')}
@@ -1632,6 +1747,15 @@ async function saveLocation() {
 /* ── 2-step booking confirmation ──────────────────── */
 let _pendingBook = null;
 
+function toggleBookFor() {
+  const isOther = $('book-other').checked;
+  $('book-for-other').classList.toggle('hidden', !isOther);
+  if (!isOther) {
+    $('book-recipient-name').value  = '';
+    $('book-recipient-phone').value = '';
+  }
+}
+
 function askBook(btn) {
   _pendingBook = {
     cid:     parseInt(btn.dataset.cid),
@@ -1647,7 +1771,11 @@ function askBook(btn) {
       </span>
     </div>
   `;
-  // Default: tomorrow, 09:00
+  // Reset form to defaults
+  $('book-self').checked          = true;
+  $('book-for-other').classList.add('hidden');
+  $('book-recipient-name').value  = '';
+  $('book-recipient-phone').value = '';
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   $('book-date').value  = tomorrow.toISOString().slice(0, 10);
@@ -1661,10 +1789,20 @@ async function doConfirmBooking() {
 
   const dateVal  = $('book-date').value;
   const timeVal  = $('book-time').value;
-  const notes    = $('book-notes').value.trim();
+  const userNotes = $('book-notes').value.trim();
 
   if (!dateVal || !timeVal) {
     toast('กรุณาระบุวันที่และเวลานัดหมาย'); return;
+  }
+
+  // Build final notes — prepend recipient info if booking for someone else
+  let finalNotes = userNotes;
+  if ($('book-other').checked) {
+    const recName  = $('book-recipient-name').value.trim();
+    const recPhone = $('book-recipient-phone').value.trim();
+    if (!recName) { toast('กรุณาระบุชื่อ-นามสกุลผู้รับบริการ'); return; }
+    const recInfo = `[จองให้: ${recName}${recPhone ? ' โทร ' + recPhone : ''}]`;
+    finalNotes = userNotes ? `${recInfo}\n${userNotes}` : recInfo;
   }
 
   const scheduled_at = `${dateVal}T${timeVal}:00`;
@@ -1677,7 +1815,7 @@ async function doConfirmBooking() {
         caretaker_id: _pendingBook.cid,
         service_type: _pendingBook.service,
         scheduled_at,
-        notes: notes || null,
+        notes: finalNotes || null,
       }),
     });
     closeModal('modal-booking');
