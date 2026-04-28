@@ -296,6 +296,14 @@ def init_db():
                 except Exception:
                     pass
 
+        # bookings: notes column
+        bk_cols = {r[1] for r in c.execute('PRAGMA table_info(bookings)')}
+        if 'notes' not in bk_cols:
+            try:
+                c.execute('ALTER TABLE bookings ADD COLUMN notes TEXT')
+            except Exception:
+                pass
+
         # 3. Upgrade legacy demo passwords → PBKDF2
         sha256_old = hashlib.sha256(b'demo1234').hexdigest()
         for old in (sha256_old, 'demo1234'):
@@ -481,8 +489,9 @@ class RegisterIn(BaseModel):
 
 class BookingIn(BaseModel):
     caretaker_id: int
-    service_type: str = Field(..., min_length=1, max_length=128)
-    scheduled_at: Optional[str] = None
+    service_type: str  = Field(..., min_length=1, max_length=128)
+    scheduled_at: Optional[str] = None   # ISO datetime string
+    notes:        Optional[str] = Field(default=None, max_length=500)
 
 
 class BookingStatusIn(BaseModel):
@@ -1005,9 +1014,9 @@ def create_booking(body: BookingIn, user=Depends(get_user)):
     eid = _eid_for_user(user)
     with db_conn() as conn:
         cur = conn.execute(
-            "INSERT INTO bookings (elderly_id, caretaker_id, service_type, scheduled_at, status)"
-            " VALUES (?,?,?,?,'pending')",
-            (eid, body.caretaker_id, body.service_type, body.scheduled_at),
+            "INSERT INTO bookings (elderly_id, caretaker_id, service_type, scheduled_at, notes, status)"
+            " VALUES (?,?,?,?,?,'pending')",
+            (eid, body.caretaker_id, body.service_type, body.scheduled_at, body.notes),
         )
         bid = cur.lastrowid
         conn.commit()

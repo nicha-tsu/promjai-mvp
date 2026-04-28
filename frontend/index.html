@@ -500,6 +500,21 @@ details[open] > summary::before { content: '▼ '; }
   <div class="modal">
     <h2 id="mbooking-title">📅 ยืนยันการจองบริการ</h2>
     <div id="mbooking-body"></div>
+
+    <label for="book-date" style="margin-top:18px;">📆 วันที่นัดหมาย</label>
+    <input type="date" id="book-date" aria-required="true">
+
+    <label for="book-time" style="margin-top:12px;">🕐 เวลา</label>
+    <input type="time" id="book-time" aria-required="true">
+
+    <label for="book-notes" style="margin-top:12px;">📝 รายละเอียดเพิ่มเติม (ไม่บังคับ)</label>
+    <textarea id="book-notes" rows="3"
+              placeholder="เช่น ต้องการความช่วยเหลือเรื่อง... มีสัตว์เลี้ยง... อาการพิเศษ..."
+              aria-describedby="notes-hint"></textarea>
+    <p id="notes-hint" class="muted" style="font-size:14px; margin:4px 0 0;">
+      ไม่เกิน 500 ตัวอักษร
+    </p>
+
     <div class="modal-actions">
       <button class="secondary" onclick="closeModal('modal-booking')"
               aria-label="ยกเลิก ปิดหน้าต่าง">ยกเลิก</button>
@@ -1631,15 +1646,29 @@ function askBook(btn) {
         ${esc(btn.dataset.rate)} บาท/ชม.
       </span>
     </div>
-    <p class="muted" style="margin-top:14px; font-size:15px;">
-      หลังจองผู้ดูแลจะได้รับการแจ้งเตือนและต้องยืนยันรับงานก่อน
-    </p>
   `;
+  // Default: tomorrow, 09:00
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  $('book-date').value  = tomorrow.toISOString().slice(0, 10);
+  $('book-time').value  = '09:00';
+  $('book-notes').value = '';
   openModal('modal-booking');
 }
 
 async function doConfirmBooking() {
   if (!_pendingBook) return;
+
+  const dateVal  = $('book-date').value;
+  const timeVal  = $('book-time').value;
+  const notes    = $('book-notes').value.trim();
+
+  if (!dateVal || !timeVal) {
+    toast('กรุณาระบุวันที่และเวลานัดหมาย'); return;
+  }
+
+  const scheduled_at = `${dateVal}T${timeVal}:00`;
+
   $('mbooking-confirm').disabled = true;
   try {
     await api('/bookings', {
@@ -1647,10 +1676,15 @@ async function doConfirmBooking() {
       body: JSON.stringify({
         caretaker_id: _pendingBook.cid,
         service_type: _pendingBook.service,
+        scheduled_at,
+        notes: notes || null,
       }),
     });
     closeModal('modal-booking');
-    toast('จองสำเร็จ! รอผู้ดูแลยืนยัน 📅');
+    const dateDisplay = new Date(scheduled_at).toLocaleString('th-TH', {
+      dateStyle: 'medium', timeStyle: 'short',
+    });
+    toast(`จองสำเร็จ! 📅 นัดหมาย ${dateDisplay}`);
     _pendingBook = null;
   } catch (e) {
     toast('ผิดพลาด: ' + e.message);
@@ -1766,8 +1800,12 @@ async function loadBookings() {
           </div>
           <div class="kv">
             <b>🛠 บริการ</b><span>${esc(r.service_type)}</span>
-            <b>📅 วันเวลา</b><span>${esc(r.scheduled_at || '-')}</span>
-            <b>🕐 สร้างเมื่อ</b><span>${esc((r.created_at || '').slice(0,16))}</span>
+            <b>📅 นัดหมาย</b>
+            <span>${r.scheduled_at
+              ? esc(new Date(r.scheduled_at).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}))
+              : '-'}</span>
+            <b>🕐 สร้างเมื่อ</b><span>${esc((r.created_at || '').slice(0,16).replace('T',' '))}</span>
+            ${r.notes ? `<b>📝 หมายเหตุ</b><span>${esc(r.notes)}</span>` : ''}
           </div>
           ${actions}
         </div>`;
