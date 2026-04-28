@@ -7,219 +7,714 @@
 <title>พร้อมใจ ใกล้บ้าน</title>
 <link rel="manifest" href="/static/manifest.webmanifest">
 <style>
+/* ══════════════════════════════════════════════════
+   CSS CUSTOM PROPERTIES & THEMES
+══════════════════════════════════════════════════ */
 :root {
-  --primary: #1f4e79;
+  --primary:       #1f4e79;
   --primary-light: #2e75b6;
-  --accent: #c0392b;
-  --bg: #f8f9fa;
-  --surface: #ffffff;
-  --text: #1a1a1a;
-  --muted: #555555;
-  --border: #d4d4d4;
-  --success: #1e7e34;
-  --warning: #d97706;
-  --danger: #b91c1c;
-  --gap: 16px;
+  --accent:        #c0392b;
+  --bg:            #f0f4f8;
+  --surface:       #ffffff;
+  --text:          #1a1a1a;
+  --muted:         #4a4a4a;
+  --border:        #c0c0c0;
+  --success:       #1a6e2e;
+  --warning:       #b45309;
+  --danger:        #9b1c1c;
+  --gap:           16px;
+  --font-base:     22px;   /* upgraded from 19 → 22 */
+  --lh:            1.65;   /* upgraded from 1.55 */
+  --target:        64px;   /* touch target AAA */
+  --focus-ring:    0 0 0 4px #ffd54f;
+  --radius:        12px;
 }
-* { box-sizing: border-box; }
+
+/* ── Font-size levels (A11y toolbar) ──────────────── */
+body[data-font="1"] { --font-base: 22px; }
+body[data-font="2"] { --font-base: 24px; }
+body[data-font="3"] { --font-base: 27px; }
+body[data-font="4"] { --font-base: 30px; }
+
+/* ── High-contrast mode ───────────────────────────── */
+body[data-hc="1"] {
+  --primary:       #003366;
+  --primary-light: #003366;
+  --bg:            #ffffff;
+  --surface:       #ffffff;
+  --text:          #000000;
+  --muted:         #222222;
+  --border:        #000000;
+  --success:       #004d00;
+  --warning:       #7a3800;
+  --danger:        #7a0000;
+}
+body[data-hc="1"] .badge.green  { background:#004d00; color:#fff; border:2px solid #000; }
+body[data-hc="1"] .badge.yellow { background:#7a3800; color:#fff; border:2px solid #000; }
+body[data-hc="1"] .badge.red    { background:#7a0000; color:#fff; border:2px solid #000; }
+body[data-hc="1"] .badge.blue   { background:#003366; color:#fff; border:2px solid #000; }
+
+/* ══════════════════════════════════════════════════
+   BASE
+══════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; }
 html, body {
   margin: 0; padding: 0;
   font-family: 'Sarabun', 'TH Sarabun New', system-ui, sans-serif;
-  font-size: 20px; line-height: 1.55;
-  color: var(--text); background: var(--bg);
+  font-size: var(--font-base);
+  line-height: var(--lh);
+  color: var(--text);
+  background: var(--bg);
+  padding-top: 44px;   /* space for a11y toolbar */
 }
-.container { max-width: 720px; margin: 0 auto; padding: 16px; }
-header {
-  background: var(--primary); color: white; padding: 16px 20px;
-  display: flex; align-items: center; justify-content: space-between;
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px 16px 90px; /* bottom padding for bottom-nav */
 }
-header h1 { margin: 0; font-size: 22px; font-weight: 700; }
-header .role-badge {
-  background: rgba(255,255,255,0.2); padding: 4px 10px;
-  border-radius: 16px; font-size: 14px;
+
+/* ══════════════════════════════════════════════════
+   SKIP LINK (keyboard users)
+══════════════════════════════════════════════════ */
+.skip-link {
+  position: absolute; top: 44px; left: 0;
+  background: var(--primary); color: white;
+  padding: 10px 18px; font-size: 18px; font-weight: 700;
+  text-decoration: none; border-radius: 0 0 8px 0;
+  transform: translateY(-200%);
+  transition: transform .2s;
+  z-index: 9999;
 }
+.skip-link:focus { transform: translateY(0); }
+
+/* Screen-reader only */
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* ══════════════════════════════════════════════════
+   A11Y TOOLBAR (fixed top)
+══════════════════════════════════════════════════ */
+#a11y-toolbar {
+  position: fixed; top: 0; left: 0; right: 0; height: 44px;
+  background: var(--primary); color: white;
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 12px; z-index: 800;
+}
+#a11y-toolbar span {
+  font-size: 13px; opacity: .85; margin-right: 4px;
+}
+.a11y-btn {
+  background: rgba(255,255,255,.18);
+  border: 1px solid rgba(255,255,255,.4);
+  color: white; border-radius: 6px;
+  padding: 4px 9px; font-size: 13px; min-height: 32px;
+  cursor: pointer; font-family: inherit; font-weight: 700;
+  line-height: 1;
+}
+.a11y-btn:hover { background: rgba(255,255,255,.32); }
+.a11y-btn.active { background: #ffd54f; color: #000; border-color: #ffd54f; }
+.a11y-btn:focus { box-shadow: var(--focus-ring); outline: none; }
+#a11y-toolbar .spacer { flex: 1; }
+
+/* ══════════════════════════════════════════════════
+   FOCUS RING (WCAG 2.4.11 AAA)
+══════════════════════════════════════════════════ */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ══════════════════════════════════════════════════
+   BUTTONS & INPUTS (64px touch targets)
+══════════════════════════════════════════════════ */
 button, .btn {
-  font-family: inherit; font-size: 18px;
-  min-height: 50px; padding: 12px 20px;
+  font-family: inherit;
+  font-size: var(--font-base);
+  min-height: var(--target); /* 64px AAA */
+  padding: 12px 22px;
   border: 2px solid transparent; border-radius: 10px;
   cursor: pointer; background: var(--primary); color: white;
-  font-weight: 600;
+  font-weight: 700; line-height: 1.3;
+  transition: background .15s, box-shadow .15s;
 }
 button:hover { background: var(--primary-light); }
-button.secondary { background: white; color: var(--primary); border-color: var(--primary); }
+button.secondary {
+  background: white; color: var(--primary);
+  border-color: var(--primary);
+}
+button.secondary:hover { background: #e8f0fb; }
 button.danger  { background: var(--danger); }
+button.danger:hover  { background: #7a1515; }
 button.success { background: var(--success); }
-button.icon-btn { padding: 8px 14px; min-height: 42px; font-size: 16px; }
-button:focus, input:focus, select:focus, textarea:focus {
-  outline: 3px solid #ffd54f; outline-offset: 2px;
+button.success:hover { background: #14551e; }
+button.icon-btn {
+  padding: 10px 16px; min-height: 52px;
+  font-size: calc(var(--font-base) - 2px);
+}
+button[disabled] {
+  opacity: .5; cursor: not-allowed; pointer-events: none;
 }
 input, select, textarea {
-  font-family: inherit; font-size: 18px; padding: 12px;
-  border: 2px solid var(--border); border-radius: 8px; width: 100%;
+  font-family: inherit;
+  font-size: var(--font-base);
+  padding: 13px 14px;
+  border: 2px solid var(--border);
+  border-radius: 10px; width: 100%;
+  line-height: var(--lh);
+  transition: border-color .15s, box-shadow .15s;
 }
-label { display: block; margin-top: 12px; font-weight: 600; }
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  border-color: var(--primary); box-shadow: var(--focus-ring);
+}
+label {
+  display: block; margin-top: 14px;
+  font-weight: 700; font-size: var(--font-base);
+}
+
+/* Password input wrapper */
+.pw-wrap { position: relative; }
+.pw-wrap input { padding-right: 56px; }
+.pw-toggle {
+  position: absolute; right: 8px; top: 50%;
+  transform: translateY(-50%);
+  background: transparent; border: none; color: var(--primary);
+  font-size: 20px; min-height: 40px; padding: 4px 8px;
+  cursor: pointer;
+}
+
+/* ══════════════════════════════════════════════════
+   CARD
+══════════════════════════════════════════════════ */
 .card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 12px; padding: 18px; margin-bottom: 14px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
 }
-.card h3 { margin: 0 0 8px 0; color: var(--primary); }
-.muted { color: var(--muted); font-size: 16px; }
-.tabs {
-  display: flex; gap: 4px; padding: 8px;
-  background: white; border-bottom: 1px solid var(--border);
-  position: sticky; top: 0; z-index: 5;
+.card h3 { margin: 0 0 10px 0; color: var(--primary); }
+
+/* ══════════════════════════════════════════════════
+   BADGES (color-blind friendly: border + text)
+══════════════════════════════════════════════════ */
+.badge {
+  padding: 5px 12px; border-radius: 14px;
+  font-size: 14px; font-weight: 700;
+  border: 2px solid transparent;
+  display: inline-flex; align-items: center; gap: 4px;
 }
-.tabs button {
-  flex: 1; min-height: 56px; font-size: 17px;
-  background: transparent; color: var(--text); border: 2px solid transparent;
-}
-.tabs button.active { background: var(--primary); color: white; }
+.badge.green  { background: #d4edda; color: #155724; border-color: #28a745; }
+.badge.yellow { background: #fff3cd; color: #856404; border-color: #ffc107; }
+.badge.red    { background: #f8d7da; color: #721c24; border-color: #dc3545; }
+.badge.blue   { background: #cce5ff; color: #004085; border-color: #007bff; }
+
+/* ══════════════════════════════════════════════════
+   MISC UTILITIES
+══════════════════════════════════════════════════ */
+.muted { color: var(--muted); font-size: calc(var(--font-base) - 2px); }
 .hidden { display: none !important; }
 .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.kv { display: grid; grid-template-columns: 140px 1fr; gap: 6px 12px; margin: 10px 0; }
+.kv {
+  display: grid; grid-template-columns: 150px 1fr;
+  gap: 8px 14px; margin: 12px 0;
+}
 .kv b { color: var(--muted); }
-.badge { padding: 4px 10px; border-radius: 14px; font-size: 14px; font-weight: 600; }
-.badge.green  { background: #d4edda; color: #155724; }
-.badge.yellow { background: #fff3cd; color: #856404; }
-.badge.red    { background: #f8d7da; color: #721c24; }
-.badge.blue   { background: #cce5ff; color: #004085; }
-.list-empty { text-align: center; padding: 40px 20px; color: var(--muted); }
-.qol-row {
-  display: grid; grid-template-columns: 140px 1fr 50px;
-  gap: 8px; margin: 10px 0; align-items: center;
-}
-.qol-row input[type=range] { width: 100%; }
 .tag {
-  display: inline-block; padding: 3px 10px; margin: 2px;
+  display: inline-block; padding: 4px 12px; margin: 3px 2px;
   background: #e3f2fd; color: var(--primary);
-  border-radius: 12px; font-size: 14px;
-}
-.metric-card {
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  color: white; padding: 18px; border-radius: 12px; margin-bottom: 14px;
-}
-.metric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
-.metric-grid .v { font-size: 22px; font-weight: 700; }
-.metric-grid .l { font-size: 13px; opacity: 0.9; }
-.toast {
-  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-  background: var(--text); color: white; padding: 14px 24px;
-  border-radius: 30px; z-index: 100; font-size: 17px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  border-radius: 14px; font-size: calc(var(--font-base) - 4px);
+  border: 1px solid #90caf9;
 }
 .score-bar {
-  height: 8px; background: #e0e0e0; border-radius: 4px;
-  overflow: hidden; margin-top: 6px;
+  height: 10px; background: #e0e0e0; border-radius: 5px;
+  overflow: hidden; margin-top: 8px;
 }
 .score-bar div { height: 100%; background: var(--primary-light); }
-.form-tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+
+/* ══════════════════════════════════════════════════
+   METRIC CARD
+══════════════════════════════════════════════════ */
+.metric-card {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: white; padding: 20px; border-radius: var(--radius); margin-bottom: 14px;
+}
+.metric-grid {
+  display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-top: 10px;
+}
+.metric-grid .v { font-size: 24px; font-weight: 700; }
+.metric-grid .l { font-size: 13px; opacity: .9; }
+
+/* ══════════════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════════════ */
+header {
+  background: var(--primary); color: white;
+  padding: 14px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+header h1 { margin: 0; font-size: 20px; font-weight: 700; }
+header .role-badge {
+  background: rgba(255,255,255,.2); padding: 4px 12px;
+  border-radius: 16px; font-size: 14px;
+}
+
+/* ══════════════════════════════════════════════════
+   BOTTOM NAVIGATION (Hoober 2013 thumb zone)
+══════════════════════════════════════════════════ */
+#bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--surface);
+  border-top: 2px solid var(--border);
+  display: flex; z-index: 100;
+  box-shadow: 0 -2px 8px rgba(0,0,0,.10);
+}
+#bottom-nav button {
+  flex: 1; min-height: 68px;
+  background: transparent; color: var(--muted);
+  border: none; border-radius: 0; font-size: 13px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 3px;
+  padding: 8px 4px; font-weight: 600;
+}
+#bottom-nav button .nav-icon { font-size: 24px; line-height: 1; }
+#bottom-nav button.active {
+  color: var(--primary);
+  border-top: 3px solid var(--primary);
+}
+#bottom-nav button:hover { background: var(--bg); color: var(--primary); }
+
+/* ══════════════════════════════════════════════════
+   AUTH TABS (login screen)
+══════════════════════════════════════════════════ */
+.form-tabs { display: flex; gap: 4px; margin-bottom: 18px; }
 .form-tabs button {
-  flex: 1; min-height: 44px; font-size: 16px;
+  flex: 1; min-height: 52px; font-size: var(--font-base);
   background: transparent; color: var(--primary);
   border: 2px solid var(--border); border-radius: 8px;
 }
-.form-tabs button.active { background: var(--primary); color: white; border-color: var(--primary); }
+.form-tabs button.active {
+  background: var(--primary); color: white; border-color: var(--primary);
+}
+
+/* ══════════════════════════════════════════════════
+   EMOJI SCALE (QoL)
+══════════════════════════════════════════════════ */
+.emoji-row {
+  display: flex; gap: 6px; margin: 8px 0 14px; flex-wrap: wrap;
+}
+.emoji-btn {
+  flex: 1; min-width: 52px; min-height: var(--target);
+  background: white; border: 2px solid var(--border);
+  border-radius: 10px; font-size: 26px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px; cursor: pointer; transition: all .15s;
+  padding: 8px 4px; color: var(--text);
+}
+.emoji-btn span.lbl {
+  font-size: 11px; font-weight: 600; display: block; line-height: 1;
+}
+.emoji-btn.selected {
+  border-color: var(--primary); border-width: 3px;
+  background: #e8f0fb; box-shadow: var(--focus-ring);
+}
+.emoji-btn:hover { border-color: var(--primary-light); background: #f0f7ff; }
+.qol-domain { margin-bottom: 18px; }
+.qol-domain label { margin-top: 0; }
+
+/* ══════════════════════════════════════════════════
+   TOAST (improved: 7s, close btn, ARIA)
+══════════════════════════════════════════════════ */
+.toast {
+  position: fixed; bottom: 84px; left: 50%;
+  transform: translateX(-50%);
+  background: #1a1a1a; color: white;
+  padding: 14px 20px 14px 24px;
+  border-radius: 30px; z-index: 500;
+  font-size: calc(var(--font-base) - 2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,.25);
+  display: flex; align-items: center; gap: 12px;
+  max-width: 90vw;
+}
+.toast-close {
+  background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.4);
+  color: white; border-radius: 50%; width: 32px; height: 32px;
+  min-height: 32px; padding: 0;
+  font-size: 16px; cursor: pointer; flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════════
+   MODALS
+══════════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 600; display: flex;
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal {
+  background: var(--surface); border-radius: var(--radius);
+  padding: 28px; width: 100%; max-width: 480px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.3);
+  max-height: 90vh; overflow-y: auto;
+}
+.modal h2 { margin: 0 0 14px; color: var(--primary); font-size: 22px; }
+.modal-actions {
+  display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;
+}
+.modal-actions button { flex: 1; min-width: 120px; }
+
+/* ══════════════════════════════════════════════════
+   HELP FAB
+══════════════════════════════════════════════════ */
+#help-fab {
+  position: fixed; bottom: 88px; right: 18px;
+  background: var(--danger); color: white;
+  width: 56px; height: 56px; min-height: 56px;
+  border-radius: 50%; font-size: 22px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.3);
+  padding: 0; z-index: 400;
+  display: none; /* shown after login */
+  align-items: center; justify-content: center;
+}
+#help-fab.visible { display: flex; }
+
+/* ══════════════════════════════════════════════════
+   ONBOARDING TOUR
+══════════════════════════════════════════════════ */
+.tour-step-dots {
+  display: flex; gap: 8px; justify-content: center; margin: 14px 0;
+}
+.tour-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--border); transition: background .2s;
+}
+.tour-dot.active { background: var(--primary); }
+
+/* ══════════════════════════════════════════════════
+   IDLE WARNING
+══════════════════════════════════════════════════ */
+#idle-countdown {
+  font-size: 36px; font-weight: 900;
+  color: var(--danger); text-align: center; margin: 10px 0;
+}
+
+/* ══════════════════════════════════════════════════
+   LIST / EMPTY STATE
+══════════════════════════════════════════════════ */
+.list-empty {
+  text-align: center; padding: 40px 20px; color: var(--muted);
+}
+.empty-cta {
+  text-align: center; padding: 32px 20px;
+}
+.empty-cta .icon { font-size: 52px; display: block; margin-bottom: 12px; }
+.empty-cta h3 { color: var(--primary); margin: 0 0 8px; }
+.empty-cta p { color: var(--muted); margin: 0 0 16px; font-size: calc(var(--font-base) - 2px); }
+
+/* ══════════════════════════════════════════════════
+   DETAILS / SUMMARY
+══════════════════════════════════════════════════ */
 details > summary {
-  cursor: pointer; font-weight: 600; color: var(--primary);
-  padding: 8px 0; list-style: none;
+  cursor: pointer; font-weight: 700; color: var(--primary);
+  padding: 10px 0; list-style: none; user-select: none;
 }
 details > summary::before { content: '▶ '; font-size: 13px; }
 details[open] > summary::before { content: '▼ '; }
+
+/* ══════════════════════════════════════════════════
+   prefers-reduced-motion
+══════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   PRINT STYLESHEET
+══════════════════════════════════════════════════ */
+@media print {
+  #a11y-toolbar, #bottom-nav, #help-fab,
+  .modal-overlay, .toast, header button { display: none !important; }
+  .container { padding: 0; }
+  body { font-size: 14pt; background: white; padding-top: 0; }
+  .card { break-inside: avoid; border: 1pt solid #aaa; margin-bottom: 8pt; }
+  a::after { content: ' (' attr(href) ')'; font-size: 10pt; }
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════ */
 @media (max-width: 480px) {
-  html, body { font-size: 19px; }
-  .kv { grid-template-columns: 110px 1fr; font-size: 16px; }
-  .tabs button { font-size: 15px; }
+  .kv { grid-template-columns: 120px 1fr; font-size: calc(var(--font-base) - 2px); }
 }
 </style>
 </head>
-<body>
+<body data-font="1" data-hc="0">
 
-<!-- ===== Login / Register ===== -->
+<!-- ── Skip link ──────────────────────────────────── -->
+<a href="#main-content" class="skip-link">ข้ามไปยังเนื้อหาหลัก</a>
+
+<!-- ── ARIA live region for toasts ────────────────── -->
+<div id="toast-live" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+<!-- ══════════════════════════════════════════════════
+     A11Y TOOLBAR
+══════════════════════════════════════════════════ -->
+<div id="a11y-toolbar" role="toolbar" aria-label="ตัวเลือกการเข้าถึง">
+  <span>ก</span>
+  <button class="a11y-btn active" id="fs1" onclick="setFont(1)" aria-pressed="true"
+          aria-label="ขนาดตัวอักษรเล็ก">A</button>
+  <button class="a11y-btn" id="fs2" onclick="setFont(2)" aria-pressed="false"
+          aria-label="ขนาดตัวอักษรปานกลาง" style="font-size:16px;">A</button>
+  <button class="a11y-btn" id="fs3" onclick="setFont(3)" aria-pressed="false"
+          aria-label="ขนาดตัวอักษรใหญ่" style="font-size:19px;">A</button>
+  <button class="a11y-btn" id="fs4" onclick="setFont(4)" aria-pressed="false"
+          aria-label="ขนาดตัวอักษรใหญ่พิเศษ" style="font-size:22px;">A</button>
+  <div class="spacer"></div>
+  <button class="a11y-btn" id="hc-btn" onclick="toggleHC()"
+          aria-pressed="false" aria-label="เปิด/ปิด โหมดคอนทราสต์สูง">◑ คอนทราสต์</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════════════ -->
+
+<!-- Confirm Booking -->
+<div id="modal-booking" class="modal-overlay hidden" role="dialog"
+     aria-modal="true" aria-labelledby="mbooking-title">
+  <div class="modal">
+    <h2 id="mbooking-title">📅 ยืนยันการจองบริการ</h2>
+    <div id="mbooking-body"></div>
+    <div class="modal-actions">
+      <button class="secondary" onclick="closeModal('modal-booking')"
+              aria-label="ยกเลิก ปิดหน้าต่าง">ยกเลิก</button>
+      <button class="success" id="mbooking-confirm" onclick="doConfirmBooking()"
+              aria-label="ยืนยันจองบริการ">✓ ยืนยันจอง</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Logout -->
+<div id="modal-logout" class="modal-overlay hidden" role="dialog"
+     aria-modal="true" aria-labelledby="mlogout-title">
+  <div class="modal">
+    <h2 id="mlogout-title">🚪 ออกจากระบบ</h2>
+    <p>ต้องการออกจากระบบจริงๆ ใช่ไหมครับ?</p>
+    <div class="modal-actions">
+      <button class="secondary" onclick="closeModal('modal-logout')">ยังอยู่ต่อ</button>
+      <button class="danger" onclick="doLogout()">ออกจากระบบ</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI Explain -->
+<div id="modal-explain" class="modal-overlay hidden" role="dialog"
+     aria-modal="true" aria-labelledby="mexplain-title">
+  <div class="modal">
+    <h2 id="mexplain-title">🔍 ทำไมถึงแนะนำ?</h2>
+    <div id="mexplain-body" style="line-height:1.8;"></div>
+    <div class="modal-actions">
+      <button onclick="closeModal('modal-explain')" style="flex:0 0 auto;">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<!-- Idle Warning -->
+<div id="modal-idle" class="modal-overlay hidden" role="alertdialog"
+     aria-modal="true" aria-labelledby="midle-title">
+  <div class="modal" style="text-align:center;">
+    <h2 id="midle-title">⏱️ คุณยังอยู่ที่นี่ไหม?</h2>
+    <p class="muted">ระบบจะออกจากบัญชีอัตโนมัติใน</p>
+    <div id="idle-countdown">60</div>
+    <p class="muted" style="font-size:15px;">วินาที</p>
+    <div class="modal-actions">
+      <button class="secondary" onclick="doLogout()">ออกจากระบบ</button>
+      <button onclick="resetIdle()" aria-label="ยังอยู่ที่นี่ ยกเลิกการออก">
+        ✋ ยังอยู่ที่นี่
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Onboarding Tour -->
+<div id="modal-tour" class="modal-overlay hidden" role="dialog"
+     aria-modal="true" aria-labelledby="mtour-title">
+  <div class="modal">
+    <h2 id="mtour-title" style="text-align:center;">🤝 ยินดีต้อนรับ!</h2>
+    <div id="tour-content" style="min-height:120px; text-align:center;"></div>
+    <div class="tour-step-dots" id="tour-dots"></div>
+    <div class="modal-actions">
+      <button class="secondary" onclick="skipTour()">ข้าม</button>
+      <button id="tour-next-btn" onclick="nextTourStep()">ถัดไป →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Help / FAQ -->
+<div id="modal-help" class="modal-overlay hidden" role="dialog"
+     aria-modal="true" aria-labelledby="mhelp-title">
+  <div class="modal">
+    <h2 id="mhelp-title">❓ วิธีใช้งาน</h2>
+    <details open>
+      <summary>ผู้สูงอายุ — หาผู้ดูแล</summary>
+      <p>ไปที่แถบ <b>👥 ผู้ดูแล</b> → กด "ค้นหาตอนนี้" → กด "จองบริการ" หน้าต่างยืนยันจะเปิดขึ้น</p>
+    </details>
+    <details>
+      <summary>ผู้ดูแล — รับงาน</summary>
+      <p>ไปที่แถบ <b>📋 งานของฉัน</b> → กด "✓ ยืนยันรับงาน" เมื่อมีการจองเข้ามา</p>
+    </details>
+    <details>
+      <summary>บันทึกคุณภาพชีวิต</summary>
+      <p>ไปที่แถบ <b>📈 คุณภาพ</b> → เลือกอารมณ์ในแต่ละด้าน → กด "บันทึก"</p>
+    </details>
+    <details>
+      <summary>ทำไมต้องระบุจังหวัด?</summary>
+      <p>ระบบใช้จังหวัดเพื่อค้นหาผู้ดูแลในรัศมี 50 กม. หากไม่ระบุจะค้นหาไม่ได้</p>
+    </details>
+    <details>
+      <summary>ข้อมูลปลอดภัยไหม?</summary>
+      <p>รหัสผ่านเข้ารหัสด้วย PBKDF2-SHA256 (260,000 รอบ) ข้อมูลไม่ถูกแชร์กับบุคคลที่สาม</p>
+    </details>
+    <div class="modal-actions">
+      <button onclick="closeModal('modal-help')">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     LOGIN / REGISTER SCREEN
+══════════════════════════════════════════════════ -->
 <div id="login-screen" class="container">
-  <h1 style="color: var(--primary); margin-top: 40px;">🤝 พร้อมใจ ใกล้บ้าน</h1>
-  <p class="muted" style="font-size: 18px;">
+  <h1 style="color:var(--primary); margin-top:32px;" role="heading" aria-level="1">
+    🤝 พร้อมใจ ใกล้บ้าน
+  </h1>
+  <p class="muted" style="font-size:calc(var(--font-base) - 2px);">
     บริการดูแลรายบุคคลจากคนในพื้นที่ ผ่านการรับรองมาตรฐาน<br>
     ขับเคลื่อนด้วย Bi-Level Graph Attention Network
   </p>
 
   <div class="card">
-    <div class="form-tabs">
-      <button class="active" id="tab-login-btn"
+    <div class="form-tabs" role="tablist">
+      <button class="active" id="tab-login-btn" role="tab"
+              aria-selected="true" aria-controls="login-form"
               onclick="switchAuthTab('login')">เข้าสู่ระบบ</button>
-      <button id="tab-reg-btn"
+      <button id="tab-reg-btn" role="tab"
+              aria-selected="false" aria-controls="register-form"
               onclick="switchAuthTab('register')">สมัครสมาชิก</button>
     </div>
 
     <!-- ── Login ── -->
-    <div id="login-form">
+    <div id="login-form" role="tabpanel" aria-labelledby="tab-login-btn">
       <label for="loginUser">ชื่อผู้ใช้</label>
-      <input id="loginUser" placeholder="เช่น elder1 หรือ care1"
+      <input id="loginUser" autocomplete="username"
+             placeholder="เช่น elder1 หรือ care1"
+             aria-required="true"
              onkeydown="if(event.key==='Enter') doLogin()">
+
       <label for="loginPass">รหัสผ่าน</label>
-      <input id="loginPass" type="password" placeholder="••••••••"
-             onkeydown="if(event.key==='Enter') doLogin()">
-      <div style="margin-top: 14px;">
-        <button onclick="doLogin()" style="width: 100%;">เข้าสู่ระบบ</button>
+      <div class="pw-wrap">
+        <input id="loginPass" type="password" autocomplete="current-password"
+               placeholder="••••••••" aria-required="true"
+               onkeydown="if(event.key==='Enter') doLogin()">
+        <button type="button" class="pw-toggle" onclick="togglePw('loginPass',this)"
+                aria-label="แสดง/ซ่อน รหัสผ่าน">👁</button>
       </div>
-      <p class="muted" style="margin-top: 12px; font-size: 15px;">
+
+      <div style="margin-top:16px;">
+        <button onclick="doLogin()" style="width:100%;"
+                aria-label="กดเพื่อเข้าสู่ระบบ">เข้าสู่ระบบ</button>
+      </div>
+      <p class="muted" style="margin-top:12px; font-size:15px; text-align:center;">
         บัญชีทดลอง: <code>elder1</code> / <code>demo1234</code> &nbsp;|&nbsp;
         <code>care1</code> / <code>demo1234</code>
       </p>
     </div>
 
     <!-- ── Register ── -->
-    <div id="register-form" class="hidden">
+    <div id="register-form" class="hidden" role="tabpanel" aria-labelledby="tab-reg-btn">
       <label for="regUser">ชื่อผู้ใช้ (3–50 ตัวอักษร)</label>
-      <input id="regUser" placeholder="username">
+      <input id="regUser" autocomplete="username"
+             placeholder="username" aria-required="true">
+
       <label for="regPass">รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)</label>
-      <input id="regPass" type="password" placeholder="••••••••">
+      <div class="pw-wrap">
+        <input id="regPass" type="password" autocomplete="new-password"
+               placeholder="••••••••" aria-required="true">
+        <button type="button" class="pw-toggle" onclick="togglePw('regPass',this)"
+                aria-label="แสดง/ซ่อน รหัสผ่าน">👁</button>
+      </div>
+
       <label for="regRole">บทบาท</label>
-      <select id="regRole" onchange="toggleRegFields()">
+      <select id="regRole" onchange="toggleRegFields()" aria-required="true">
         <option value="elderly">ผู้สูงอายุ</option>
         <option value="caretaker">ผู้ดูแล</option>
       </select>
-      <label for="regName">ชื่อ–นามสกุล</label>
-      <input id="regName" placeholder="ชื่อเต็ม">
 
-      <label style="margin-top: 12px;">วัน / เดือน / ปีเกิด (พ.ศ.)</label>
-      <div class="row" style="gap: 8px; margin-top: 4px;">
-        <select id="regDay"   style="flex: 0 0 72px;"></select>
-        <select id="regMonth" style="flex: 1 1 0;"></select>
-        <select id="regYear"  style="flex: 0 0 96px;"></select>
+      <label for="regName">ชื่อ–นามสกุล</label>
+      <input id="regName" placeholder="ชื่อเต็ม" aria-required="true"
+             autocomplete="name">
+
+      <label>วัน / เดือน / ปีเกิด (พ.ศ.)</label>
+      <div class="row" style="gap:8px; margin-top:4px;">
+        <select id="regDay"   style="flex:0 0 76px;" aria-label="วันเกิด" aria-required="true"></select>
+        <select id="regMonth" style="flex:1 1 0;"    aria-label="เดือนเกิด" aria-required="true"></select>
+        <select id="regYear"  style="flex:0 0 100px;" aria-label="ปีเกิด พ.ศ." aria-required="true"></select>
       </div>
 
-      <label style="margin-top: 12px;">เพศ</label>
-      <select id="regGender">
+      <label for="regGender" style="margin-top:14px;">เพศ</label>
+      <select id="regGender" aria-required="true">
         <option value="M">ชาย</option>
         <option value="F">หญิง</option>
         <option value="other">อื่นๆ</option>
       </select>
+
       <label for="regProvince">จังหวัด</label>
-      <input id="regProvince" placeholder="เช่น สงขลา"
-             oninput="onProvinceInput('reg')">
+      <input id="regProvince" placeholder="เช่น สงขลา" autocomplete="address-level1">
+
       <label for="regDistrict">อำเภอ</label>
-      <input id="regDistrict" placeholder="เช่น หาดใหญ่">
+      <input id="regDistrict" placeholder="เช่น หาดใหญ่" autocomplete="address-level2">
+
       <label for="regPhone">เบอร์โทร (ไม่บังคับ)</label>
-      <input id="regPhone" type="tel" placeholder="08x-xxx-xxxx">
+      <input id="regPhone" type="tel" placeholder="08x-xxx-xxxx"
+             autocomplete="tel">
 
       <!-- Caretaker-only fields -->
       <div id="caretaker-fields" class="hidden">
         <label for="regSkills">ทักษะ (คั่นด้วย |)</label>
         <input id="regSkills" placeholder="ดูแลผู้สูงอายุ|ทำอาหาร|พยาบาล">
+
         <label for="regRate">ค่าบริการ (บาท/ชม.)</label>
-        <input id="regRate" type="number" min="0" placeholder="150">
-        <details style="margin-top: 12px;">
+        <input id="regRate" type="number" min="0" placeholder="150" aria-describedby="rate-hint">
+        <p id="rate-hint" class="muted" style="font-size:14px; margin:4px 0 0;">
+          ระบุราคาที่คุณให้บริการต่อชั่วโมง
+        </p>
+
+        <details style="margin-top:14px;">
           <summary>📍 พิกัดแผนที่ (ไม่บังคับ)</summary>
-          <p class="muted" style="margin: 6px 0; font-size: 15px;">
+          <p class="muted" style="margin:6px 0; font-size:15px;">
             💡 หากไม่กรอก ระบบจะใช้พิกัดกลางจังหวัดอัตโนมัติ
           </p>
-          <div class="row" style="gap: 12px;">
-            <div style="flex: 1;">
+          <div class="row" style="gap:12px;">
+            <div style="flex:1;">
               <label for="regLat">Latitude</label>
               <input id="regLat" type="number" step="0.0001" placeholder="7.1234">
             </div>
-            <div style="flex: 1;">
+            <div style="flex:1;">
               <label for="regLon">Longitude</label>
               <input id="regLon" type="number" step="0.0001" placeholder="100.5678">
             </div>
@@ -227,222 +722,321 @@ details[open] > summary::before { content: '▼ '; }
         </details>
       </div>
 
-      <div style="margin-top: 16px;">
-        <button onclick="doRegister()" style="width: 100%;">สมัครสมาชิก</button>
+      <div style="margin-top:18px;">
+        <button onclick="doRegister()" style="width:100%;"
+                aria-label="สมัครสมาชิกใหม่">สมัครสมาชิก</button>
       </div>
     </div>
   </div>
 
-  <div class="card" style="background: #fff8e1; border-color: #ffd54f;">
-    <h3 style="color: var(--warning);">📊 ข้อมูลโมเดลปัจจุบัน</h3>
-    <div id="model-info" class="muted">กำลังโหลด...</div>
+  <div class="card" style="background:#fff8e1; border-color:#ffd54f;" role="complementary"
+       aria-label="ข้อมูลโมเดล">
+    <h3 style="color:var(--warning);">📊 ข้อมูลโมเดลปัจจุบัน</h3>
+    <div id="model-info" class="muted" aria-live="polite">กำลังโหลด...</div>
   </div>
 </div>
 
-<!-- ===== Main app ===== -->
+<!-- ══════════════════════════════════════════════════
+     MAIN APP
+══════════════════════════════════════════════════ -->
 <div id="main-app" class="hidden">
-  <header>
+
+  <header role="banner">
     <h1>🤝 พร้อมใจ ใกล้บ้าน</h1>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <span class="role-badge" id="role-badge">elderly</span>
-      <button class="icon-btn secondary" onclick="doLogout()">ออก</button>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <span class="role-badge" id="role-badge" aria-label="บทบาทของคุณ"></span>
+      <button class="icon-btn secondary" onclick="askLogout()"
+              aria-label="กดเพื่อออกจากระบบ" style="min-height:44px;">ออก</button>
     </div>
   </header>
 
-  <!-- Tabs for elderly -->
-  <div class="tabs" id="elderly-tabs">
-    <button class="active" data-tab="recommend">🎯 แนะนำ</button>
-    <button data-tab="caretaker">👥 ผู้ดูแล</button>
-    <button data-tab="qol">📈 คุณภาพชีวิต</button>
-  </div>
-  <!-- Tabs for caretaker -->
-  <div class="tabs hidden" id="caretaker-tabs">
-    <button class="active" data-tab="my-bookings">📋 งานของฉัน</button>
-    <button data-tab="all-caretakers">📂 ทั้งหมด</button>
-    <button data-tab="profile">👤 โปรไฟล์</button>
-  </div>
+  <main id="main-content" class="container" role="main">
 
-  <div class="container">
-
-    <!-- ELDERLY: Recommendations -->
-    <section id="tab-recommend" class="tab-pane">
+    <!-- ── ELDERLY: Recommendations ── -->
+    <section id="tab-recommend" class="tab-pane" aria-label="กิจกรรมแนะนำ">
       <div class="metric-card">
-        <h3 style="margin:0;color:white;">🌟 กิจกรรมแนะนำสำหรับคุณ</h3>
-        <p style="margin:6px 0 0;opacity:.95;">
+        <h2 style="margin:0; color:white; font-size:20px;">🌟 กิจกรรมแนะนำสำหรับคุณ</h2>
+        <p style="margin:6px 0 0; opacity:.95; font-size:calc(var(--font-base) - 3px);">
           แนะนำโดย Bi-Level GAT — เรียนรู้จากเพื่อนใกล้ตัว + กิจกรรมที่คุณชอบ
         </p>
       </div>
-      <div id="rec-list" class="list-empty">กำลังโหลดคำแนะนำ...</div>
+      <div id="rec-list" aria-live="polite" aria-label="รายการกิจกรรมแนะนำ">
+        <div class="list-empty">กำลังโหลดคำแนะนำ...</div>
+      </div>
     </section>
 
-    <!-- ELDERLY: Caretaker match -->
-    <section id="tab-caretaker" class="tab-pane hidden">
+    <!-- ── ELDERLY: Caretaker match ── -->
+    <section id="tab-caretaker" class="tab-pane hidden" aria-label="ค้นหาผู้ดูแล">
       <div class="card">
-        <h3>🔍 ค้นหาผู้ดูแลใกล้บ้าน</h3>
+        <h2 style="color:var(--primary); font-size:20px; margin:0 0 8px;">🔍 ค้นหาผู้ดูแลใกล้บ้าน</h2>
         <p class="muted">ระบบจะแสดงผู้ดูแลในรัศมี 50 กม. เรียงตามคะแนน + ระยะทาง + การรับรอง</p>
-        <button onclick="loadCaretakers()" style="margin-top:8px;">ค้นหาตอนนี้</button>
+        <button onclick="loadCaretakers()" style="margin-top:10px;"
+                aria-label="ค้นหาผู้ดูแลใกล้บ้านตอนนี้">ค้นหาตอนนี้</button>
       </div>
-      <!-- Location setup card (shown when no location is set) -->
-      <div id="location-setup" class="card hidden" style="border-color: var(--warning);">
-        <h3 style="color: var(--warning);">📍 ตั้งค่าที่อยู่ก่อนใช้งาน</h3>
+      <div id="location-setup" class="card hidden" style="border-color:var(--warning);"
+           aria-live="polite">
+        <h3 style="color:var(--warning);">📍 ตั้งค่าที่อยู่ก่อนใช้งาน</h3>
         <p class="muted">กรอกจังหวัดเพื่อให้ระบบค้นหาผู้ดูแลในพื้นที่ของคุณได้</p>
         <label for="locProvince">จังหวัด</label>
         <input id="locProvince" placeholder="เช่น เชียงใหม่"
+               aria-required="true"
                onkeydown="if(event.key==='Enter') saveLocation()">
-        <button onclick="saveLocation()" style="margin-top:10px;width:100%;">
+        <button onclick="saveLocation()" style="margin-top:12px; width:100%;"
+                aria-label="บันทึกที่อยู่และค้นหาผู้ดูแล">
           บันทึกที่อยู่ &amp; ค้นหา
         </button>
       </div>
-      <div id="caretaker-list" class="list-empty">กดปุ่ม "ค้นหาตอนนี้" เพื่อแสดงรายการ</div>
-    </section>
-
-    <!-- ELDERLY: QoL -->
-    <section id="tab-qol" class="tab-pane hidden">
-      <div class="card">
-        <h3>📋 บันทึก WHOQOL-BREF (4 ด้าน)</h3>
-        <p class="muted">ประเมินความรู้สึกของคุณในแต่ละด้าน 0–100 คะแนน</p>
-        <div class="qol-row">
-          <label for="qol-phys">กาย</label>
-          <input type="range" id="qol-phys" min="0" max="100" value="55"
-                 oninput="updRange('qol-phys')">
-          <span id="qol-phys-v">55</span>
+      <div id="caretaker-list" aria-live="polite" aria-label="รายการผู้ดูแล">
+        <div class="empty-cta">
+          <span class="icon">👥</span>
+          <h3>ยังไม่ได้ค้นหา</h3>
+          <p>กดปุ่ม "ค้นหาตอนนี้" เพื่อดูผู้ดูแลใกล้บ้าน</p>
         </div>
-        <div class="qol-row">
-          <label for="qol-psy">ใจ</label>
-          <input type="range" id="qol-psy" min="0" max="100" value="55"
-                 oninput="updRange('qol-psy')">
-          <span id="qol-psy-v">55</span>
-        </div>
-        <div class="qol-row">
-          <label for="qol-soc">สังคม</label>
-          <input type="range" id="qol-soc" min="0" max="100" value="55"
-                 oninput="updRange('qol-soc')">
-          <span id="qol-soc-v">55</span>
-        </div>
-        <div class="qol-row">
-          <label for="qol-env">สภาพแวดล้อม</label>
-          <input type="range" id="qol-env" min="0" max="100" value="55"
-                 oninput="updRange('qol-env')">
-          <span id="qol-env-v">55</span>
-        </div>
-        <button onclick="saveQol()" style="margin-top:12px;">บันทึก</button>
-      </div>
-      <div class="card">
-        <h3>📜 ประวัติ</h3>
-        <div id="qol-history" class="list-empty">ยังไม่มีบันทึก</div>
       </div>
     </section>
 
-    <!-- CARETAKER: My Bookings -->
-    <section id="tab-my-bookings" class="tab-pane hidden">
+    <!-- ── ELDERLY: QoL ── -->
+    <section id="tab-qol" class="tab-pane hidden" aria-label="บันทึกคุณภาพชีวิต">
       <div class="card">
-        <h3>📋 รายการงานของฉัน</h3>
-        <button onclick="loadBookings()">รีเฟรช</button>
+        <h2 style="color:var(--primary); font-size:20px; margin:0 0 6px;">
+          📋 บันทึก WHOQOL-BREF (4 ด้าน)
+        </h2>
+        <p class="muted">เลือกอารมณ์ที่ตรงกับความรู้สึกของคุณในแต่ละด้าน</p>
+        <p class="muted" style="font-size:13px;">
+          😢 แย่มาก &nbsp;😟 แย่ &nbsp;😐 ปานกลาง &nbsp;🙂 ดี &nbsp;😄 ดีมาก
+        </p>
+
+        <!-- Physical -->
+        <div class="qol-domain">
+          <label id="lbl-phys">🏃 ด้านกาย (Physical)</label>
+          <input type="hidden" id="qol-phys" value="60">
+          <div class="emoji-row" role="group" aria-labelledby="lbl-phys">
+            <button type="button" class="emoji-btn" data-domain="qol-phys" data-val="20"
+                    onclick="setQol('qol-phys',20)" aria-label="แย่มาก">
+              😢<span class="lbl">แย่มาก</span>
+            </button>
+            <button type="button" class="emoji-btn" data-domain="qol-phys" data-val="40"
+                    onclick="setQol('qol-phys',40)" aria-label="แย่">
+              😟<span class="lbl">แย่</span>
+            </button>
+            <button type="button" class="emoji-btn selected" data-domain="qol-phys" data-val="60"
+                    onclick="setQol('qol-phys',60)" aria-label="ปานกลาง" aria-pressed="true">
+              😐<span class="lbl">ปานกลาง</span>
+            </button>
+            <button type="button" class="emoji-btn" data-domain="qol-phys" data-val="80"
+                    onclick="setQol('qol-phys',80)" aria-label="ดี">
+              🙂<span class="lbl">ดี</span>
+            </button>
+            <button type="button" class="emoji-btn" data-domain="qol-phys" data-val="100"
+                    onclick="setQol('qol-phys',100)" aria-label="ดีมาก">
+              😄<span class="lbl">ดีมาก</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Psychological -->
+        <div class="qol-domain">
+          <label id="lbl-psy">🧠 ด้านใจ (Psychological)</label>
+          <input type="hidden" id="qol-psy" value="60">
+          <div class="emoji-row" role="group" aria-labelledby="lbl-psy">
+            <button type="button" class="emoji-btn" data-domain="qol-psy" data-val="20"
+                    onclick="setQol('qol-psy',20)" aria-label="แย่มาก">😢<span class="lbl">แย่มาก</span></button>
+            <button type="button" class="emoji-btn" data-domain="qol-psy" data-val="40"
+                    onclick="setQol('qol-psy',40)" aria-label="แย่">😟<span class="lbl">แย่</span></button>
+            <button type="button" class="emoji-btn selected" data-domain="qol-psy" data-val="60"
+                    onclick="setQol('qol-psy',60)" aria-label="ปานกลาง" aria-pressed="true">😐<span class="lbl">ปานกลาง</span></button>
+            <button type="button" class="emoji-btn" data-domain="qol-psy" data-val="80"
+                    onclick="setQol('qol-psy',80)" aria-label="ดี">🙂<span class="lbl">ดี</span></button>
+            <button type="button" class="emoji-btn" data-domain="qol-psy" data-val="100"
+                    onclick="setQol('qol-psy',100)" aria-label="ดีมาก">😄<span class="lbl">ดีมาก</span></button>
+          </div>
+        </div>
+
+        <!-- Social -->
+        <div class="qol-domain">
+          <label id="lbl-soc">👥 ด้านสังคม (Social)</label>
+          <input type="hidden" id="qol-soc" value="60">
+          <div class="emoji-row" role="group" aria-labelledby="lbl-soc">
+            <button type="button" class="emoji-btn" data-domain="qol-soc" data-val="20"
+                    onclick="setQol('qol-soc',20)" aria-label="แย่มาก">😢<span class="lbl">แย่มาก</span></button>
+            <button type="button" class="emoji-btn" data-domain="qol-soc" data-val="40"
+                    onclick="setQol('qol-soc',40)" aria-label="แย่">😟<span class="lbl">แย่</span></button>
+            <button type="button" class="emoji-btn selected" data-domain="qol-soc" data-val="60"
+                    onclick="setQol('qol-soc',60)" aria-label="ปานกลาง" aria-pressed="true">😐<span class="lbl">ปานกลาง</span></button>
+            <button type="button" class="emoji-btn" data-domain="qol-soc" data-val="80"
+                    onclick="setQol('qol-soc',80)" aria-label="ดี">🙂<span class="lbl">ดี</span></button>
+            <button type="button" class="emoji-btn" data-domain="qol-soc" data-val="100"
+                    onclick="setQol('qol-soc',100)" aria-label="ดีมาก">😄<span class="lbl">ดีมาก</span></button>
+          </div>
+        </div>
+
+        <!-- Environment -->
+        <div class="qol-domain">
+          <label id="lbl-env">🌳 ด้านสภาพแวดล้อม (Environment)</label>
+          <input type="hidden" id="qol-env" value="60">
+          <div class="emoji-row" role="group" aria-labelledby="lbl-env">
+            <button type="button" class="emoji-btn" data-domain="qol-env" data-val="20"
+                    onclick="setQol('qol-env',20)" aria-label="แย่มาก">😢<span class="lbl">แย่มาก</span></button>
+            <button type="button" class="emoji-btn" data-domain="qol-env" data-val="40"
+                    onclick="setQol('qol-env',40)" aria-label="แย่">😟<span class="lbl">แย่</span></button>
+            <button type="button" class="emoji-btn selected" data-domain="qol-env" data-val="60"
+                    onclick="setQol('qol-env',60)" aria-label="ปานกลาง" aria-pressed="true">😐<span class="lbl">ปานกลาง</span></button>
+            <button type="button" class="emoji-btn" data-domain="qol-env" data-val="80"
+                    onclick="setQol('qol-env',80)" aria-label="ดี">🙂<span class="lbl">ดี</span></button>
+            <button type="button" class="emoji-btn" data-domain="qol-env" data-val="100"
+                    onclick="setQol('qol-env',100)" aria-label="ดีมาก">😄<span class="lbl">ดีมาก</span></button>
+          </div>
+        </div>
+
+        <button onclick="saveQol()" aria-label="บันทึกคะแนนคุณภาพชีวิต">
+          💾 บันทึก
+        </button>
       </div>
-      <div id="caretaker-bookings" class="list-empty">กำลังโหลด...</div>
+
+      <div class="card">
+        <h3>📜 ประวัติการบันทึก</h3>
+        <div id="qol-history" aria-live="polite">
+          <div class="empty-cta">
+            <span class="icon">📋</span>
+            <h3>ยังไม่มีบันทึก</h3>
+            <p>กดบันทึกเพื่อเริ่มติดตามคุณภาพชีวิต</p>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <!-- CARETAKER: All caretakers -->
-    <section id="tab-all-caretakers" class="tab-pane hidden">
-      <div class="card">
-        <h3>📂 ผู้ดูแลทั้งหมดในระบบ</h3>
-        <p class="muted">รวม Seed (CSV) + ผู้ดูแลที่สมัครสมาชิกใหม่</p>
-        <button onclick="loadAllCaretakers()">รีเฟรช</button>
+    <!-- ── CARETAKER: My Bookings ── -->
+    <section id="tab-my-bookings" class="tab-pane hidden" aria-label="รายการงานของฉัน">
+      <div class="card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <h2 style="color:var(--primary); font-size:20px; margin:0;">📋 รายการงานของฉัน</h2>
+        <button class="icon-btn secondary" onclick="loadBookings()"
+                aria-label="รีเฟรชรายการงาน">🔄 รีเฟรช</button>
       </div>
-      <div id="all-caretakers-list" class="list-empty">กำลังโหลด...</div>
+      <div id="caretaker-bookings" aria-live="polite">
+        <div class="list-empty">กำลังโหลด...</div>
+      </div>
     </section>
 
-    <!-- CARETAKER: Profile -->
-    <section id="tab-profile" class="tab-pane hidden">
-      <!-- Current profile display -->
+    <!-- ── CARETAKER: All caretakers ── -->
+    <section id="tab-all-caretakers" class="tab-pane hidden" aria-label="ผู้ดูแลทั้งหมด">
+      <div class="card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <h2 style="color:var(--primary); font-size:20px; margin:0 0 4px;">📂 ผู้ดูแลทั้งหมด</h2>
+          <p class="muted" style="margin:0;">รวม Seed (CSV) + ผู้ดูแลที่สมัครใหม่</p>
+        </div>
+        <button class="icon-btn secondary" onclick="loadAllCaretakers()"
+                aria-label="รีเฟรชรายการผู้ดูแล">🔄 รีเฟรช</button>
+      </div>
+      <div id="all-caretakers-list" aria-live="polite">
+        <div class="list-empty">กำลังโหลด...</div>
+      </div>
+    </section>
+
+    <!-- ── CARETAKER: Profile ── -->
+    <section id="tab-profile" class="tab-pane hidden" aria-label="โปรไฟล์ผู้ดูแล">
       <div class="card">
-        <h3>👤 โปรไฟล์ผู้ดูแล</h3>
-        <div id="caretaker-profile" class="list-empty">กำลังโหลด...</div>
+        <h2 style="color:var(--primary); font-size:20px; margin:0 0 10px;">👤 โปรไฟล์ของฉัน</h2>
+        <div id="caretaker-profile" aria-live="polite">
+          <div class="list-empty">กำลังโหลด...</div>
+        </div>
       </div>
 
-      <!-- Edit form -->
       <div class="card">
         <h3>✏️ แก้ไขโปรไฟล์</h3>
         <p class="muted" style="margin-top:0;">เฉพาะช่องที่กรอกจะถูกอัปเดต</p>
 
         <label for="editSkills">ทักษะ (คั่นด้วย |)</label>
-        <input id="editSkills" placeholder="ดูแลผู้สูงอายุ|ทำอาหาร|พยาบาล">
+        <input id="editSkills" placeholder="ดูแลผู้สูงอายุ|ทำอาหาร|พยาบาล"
+               aria-describedby="skills-hint">
+        <p id="skills-hint" class="muted" style="font-size:14px; margin:4px 0 0;">
+          ใส่ทักษะหลายอย่างโดยคั่นด้วยเครื่องหมาย |
+        </p>
 
         <label for="editRate">ค่าบริการ (บาท/ชม.)</label>
         <input id="editRate" type="number" min="0" placeholder="150">
 
-        <div class="row" style="gap: 12px; margin-top: 12px;">
-          <div style="flex: 1;">
+        <div class="row" style="gap:12px; margin-top:14px;">
+          <div style="flex:1;">
             <label for="editProvince">จังหวัด</label>
             <input id="editProvince" placeholder="เช่น สงขลา"
-                   oninput="onProvinceInput('edit')">
+                   autocomplete="address-level1">
           </div>
-          <div style="flex: 1;">
+          <div style="flex:1;">
             <label for="editDistrict">อำเภอ</label>
-            <input id="editDistrict" placeholder="เช่น หาดใหญ่">
+            <input id="editDistrict" placeholder="เช่น หาดใหญ่"
+                   autocomplete="address-level2">
           </div>
         </div>
 
         <label for="editPhone">เบอร์โทร</label>
-        <input id="editPhone" type="tel" placeholder="08x-xxx-xxxx">
+        <input id="editPhone" type="tel" placeholder="08x-xxx-xxxx"
+               autocomplete="tel">
 
         <label for="editBio">แนะนำตัวสั้นๆ</label>
-        <textarea id="editBio" rows="3" placeholder="ประสบการณ์ดูแลผู้สูงอายุ..."></textarea>
+        <textarea id="editBio" rows="3"
+                  placeholder="ประสบการณ์ดูแลผู้สูงอายุ..."
+                  aria-describedby="bio-hint"></textarea>
+        <p id="bio-hint" class="muted" style="font-size:14px; margin:4px 0 0;">
+          ไม่เกิน 1,000 ตัวอักษร
+        </p>
 
-        <details style="margin-top: 12px;">
+        <details style="margin-top:14px;">
           <summary>📍 พิกัดแผนที่ (ไม่บังคับ)</summary>
-          <p class="muted" style="margin: 6px 0; font-size: 15px;">
+          <p class="muted" style="margin:6px 0; font-size:15px;">
             💡 กรอกจังหวัดแล้วระบบจะเติมพิกัดกลางจังหวัดอัตโนมัติ
           </p>
-          <div class="row" style="gap: 12px;">
-            <div style="flex: 1;">
+          <div class="row" style="gap:12px;">
+            <div style="flex:1;">
               <label for="editLat">Latitude</label>
               <input id="editLat" type="number" step="0.0001" placeholder="7.1234">
             </div>
-            <div style="flex: 1;">
+            <div style="flex:1;">
               <label for="editLon">Longitude</label>
               <input id="editLon" type="number" step="0.0001" placeholder="100.5678">
             </div>
           </div>
         </details>
 
-        <button onclick="saveProfile()" style="margin-top:14px;width:100%;">
+        <button onclick="saveProfile()" style="margin-top:16px; width:100%;"
+                aria-label="บันทึกการเปลี่ยนแปลงโปรไฟล์">
           💾 บันทึกโปรไฟล์
         </button>
       </div>
     </section>
 
-  </div>
-</div>
+  </main><!-- /#main-content -->
 
+  <!-- ── Bottom Navigation ── -->
+  <nav id="bottom-nav" role="navigation" aria-label="เมนูหลัก"></nav>
+
+</div><!-- /#main-app -->
+
+<!-- ── Help FAB ────────────────────────────────────── -->
+<button id="help-fab" onclick="openModal('modal-help')"
+        aria-label="เปิดวิธีใช้งาน / FAQ">❓</button>
+
+<!-- ══════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════ -->
 <script>
 'use strict';
 const API = window.location.origin;
 let TOKEN = null, ROLE = null;
 
-/* ── Helpers ──────────────────────────────────────── */
+/* ════════════════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════════════════ */
 function $(id) { return document.getElementById(id); }
 
-/** Escape HTML — prevents XSS when injecting API data into innerHTML */
 function esc(s) {
   return String(s ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function toast(msg, dur = 2600) {
-  const el = document.createElement('div');
-  el.className = 'toast';
-  el.textContent = msg;
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), dur);
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
 }
 
 async function api(path, opts = {}) {
-  opts.headers = Object.assign({'Content-Type': 'application/json'}, opts.headers || {});
+  opts.headers = Object.assign({'Content-Type':'application/json'}, opts.headers || {});
   if (TOKEN) opts.headers['Authorization'] = 'Bearer ' + TOKEN;
   const res = await fetch(API + path, opts);
   if (!res.ok) {
@@ -453,66 +1047,159 @@ async function api(path, opts = {}) {
   return res.json();
 }
 
-function updRange(id) { $(id + '-v').textContent = $(id).value; }
+/* ════════════════════════════════════════════════════
+   TOAST — 7s, close button, ARIA live
+════════════════════════════════════════════════════ */
+function toast(msg, dur = 7000) {
+  // Update ARIA live region
+  $('toast-live').textContent = msg;
 
-/* ── Birthdate dropdowns (วัน/เดือน/ปี พ.ศ.) ──────── */
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.setAttribute('role', 'alert');
+
+  const txt = document.createElement('span');
+  txt.textContent = msg;
+
+  const btn = document.createElement('button');
+  btn.className = 'toast-close';
+  btn.setAttribute('aria-label', 'ปิดการแจ้งเตือน');
+  btn.textContent = '×';
+  btn.onclick = () => { clearTimeout(t); el.remove(); };
+
+  el.append(txt, btn);
+  document.body.appendChild(el);
+
+  const t = setTimeout(() => {
+    el.remove();
+    $('toast-live').textContent = '';
+  }, dur);
+}
+
+/* ════════════════════════════════════════════════════
+   MODALS
+════════════════════════════════════════════════════ */
+function openModal(id) {
+  $(id).classList.remove('hidden');
+  // Focus first focusable element
+  const first = $(id).querySelector('button, input, select, textarea, [tabindex]');
+  if (first) setTimeout(() => first.focus(), 50);
+}
+function closeModal(id) {
+  $(id).classList.add('hidden');
+}
+// Close modal on backdrop click
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => {
+    if (e.target === el) el.classList.add('hidden');
+  });
+});
+// Close modal on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m => {
+      if (!m.id.startsWith('modal-idle')) m.classList.add('hidden');
+    });
+  }
+});
+
+/* ════════════════════════════════════════════════════
+   A11Y — FONT SIZE
+════════════════════════════════════════════════════ */
+function setFont(level) {
+  document.body.dataset.font = level;
+  localStorage.setItem('promjai_font', level);
+  for (let i = 1; i <= 4; i++) {
+    const b = $('fs' + i);
+    if (b) {
+      b.classList.toggle('active', i === level);
+      b.setAttribute('aria-pressed', i === level ? 'true' : 'false');
+    }
+  }
+}
+
+function toggleHC() {
+  const cur = parseInt(document.body.dataset.hc || '0');
+  const next = cur ? 0 : 1;
+  document.body.dataset.hc = next;
+  localStorage.setItem('promjai_hc', next);
+  $('hc-btn').classList.toggle('active', !!next);
+  $('hc-btn').setAttribute('aria-pressed', next ? 'true' : 'false');
+}
+
+/* ════════════════════════════════════════════════════
+   PASSWORD SHOW / HIDE
+════════════════════════════════════════════════════ */
+function togglePw(inputId, btn) {
+  const inp = $(inputId);
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    btn.textContent = '🙈';
+    btn.setAttribute('aria-label', 'ซ่อนรหัสผ่าน');
+  } else {
+    inp.type = 'password';
+    btn.textContent = '👁';
+    btn.setAttribute('aria-label', 'แสดงรหัสผ่าน');
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   BIRTHDATE PICKER (พ.ศ.)
+════════════════════════════════════════════════════ */
 (function initBirthdatePicker() {
   const MONTHS_TH = [
     'มกราคม','กุมภาพันธ์','มีนาคม','เมษายน',
     'พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม',
     'กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม',
   ];
-  // days
   const dSel = $('regDay');
   dSel.innerHTML = '<option value="">วัน</option>';
   for (let d = 1; d <= 31; d++) {
     const o = document.createElement('option');
-    o.value = String(d).padStart(2, '0');
+    o.value = String(d).padStart(2,'0');
     o.textContent = d;
     dSel.appendChild(o);
   }
-  // months
   const mSel = $('regMonth');
   mSel.innerHTML = '<option value="">เดือน</option>';
   MONTHS_TH.forEach((name, i) => {
     const o = document.createElement('option');
-    o.value = String(i + 1).padStart(2, '0');
+    o.value = String(i+1).padStart(2,'0');
     o.textContent = name;
     mSel.appendChild(o);
   });
-  // years — พ.ศ. current−14 down to current−100
-  const ySel  = $('regYear');
+  const ySel = $('regYear');
   const curBE = new Date().getFullYear() + 543;
   ySel.innerHTML = '<option value="">ปี พ.ศ.</option>';
   for (let y = curBE - 14; y >= curBE - 100; y--) {
     const o = document.createElement('option');
-    o.value = y;
-    o.textContent = y;
+    o.value = y; o.textContent = y;
     ySel.appendChild(o);
   }
 })();
 
-/* ── Province auto-fill hint ─────────────────────── */
-function onProvinceInput(prefix) {
-  // Just a hint — actual auto-fill happens server-side in PUT /profile / POST /auth/register
-}
-
-/* ── Auth-tab switcher ───────────────────────────── */
+/* ════════════════════════════════════════════════════
+   AUTH TAB SWITCHER
+════════════════════════════════════════════════════ */
 function switchAuthTab(tab) {
   $('login-form').classList.toggle('hidden',    tab !== 'login');
   $('register-form').classList.toggle('hidden', tab !== 'register');
   $('tab-login-btn').classList.toggle('active', tab === 'login');
   $('tab-reg-btn').classList.toggle('active',   tab === 'register');
+  $('tab-login-btn').setAttribute('aria-selected', tab === 'login' ? 'true' : 'false');
+  $('tab-reg-btn').setAttribute('aria-selected',   tab !== 'login' ? 'true' : 'false');
 }
 function toggleRegFields() {
   $('caretaker-fields').classList.toggle('hidden', $('regRole').value !== 'caretaker');
 }
 
-/* ── Login ───────────────────────────────────────── */
+/* ════════════════════════════════════════════════════
+   LOGIN
+════════════════════════════════════════════════════ */
 async function doLogin() {
   const username = $('loginUser').value.trim();
   const password = $('loginPass').value;
-  if (!username || !password) { toast('กรุณากรอกข้อมูล'); return; }
+  if (!username || !password) { toast('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน'); return; }
   try {
     const r = await api('/auth/login', {
       method: 'POST',
@@ -525,7 +1212,9 @@ async function doLogin() {
   } catch (e) { toast('เข้าสู่ระบบไม่สำเร็จ: ' + e.message); }
 }
 
-/* ── Register ────────────────────────────────────── */
+/* ════════════════════════════════════════════════════
+   REGISTER
+════════════════════════════════════════════════════ */
 async function doRegister() {
   const username = $('regUser').value.trim();
   const password = $('regPass').value;
@@ -539,17 +1228,12 @@ async function doRegister() {
   if (!username || !password || !name || !dd || !mm || !yyBE) {
     toast('กรุณากรอกข้อมูลให้ครบ (ชื่อ / วันเกิด)'); return;
   }
-
-  // Convert พ.ศ. → ค.ศ. and build ISO date
-  const yyCE      = parseInt(yyBE) - 543;
+  const yyCE = parseInt(yyBE) - 543;
   const birth_date = `${yyCE}-${mm}-${dd}`;
-
-  // Sanity-check the resulting date
   const testDate = new Date(birth_date + 'T00:00:00');
   if (isNaN(testDate) || testDate.getMonth() + 1 !== parseInt(mm)) {
     toast('วันเกิดไม่ถูกต้อง (เช่น วันที่ 30 กุมภาพันธ์ไม่มีอยู่)'); return;
   }
-
   const body = {
     username, password, role, name, birth_date, gender,
     province:    $('regProvince').value.trim(),
@@ -561,97 +1245,266 @@ async function doRegister() {
     lon:         role === 'caretaker' ? (parseFloat($('regLon').value)  || null) : null,
   };
   try {
-    await api('/auth/register', {method: 'POST', body: JSON.stringify(body)});
+    await api('/auth/register', {method:'POST', body:JSON.stringify(body)});
     toast('สมัครสมาชิกสำเร็จ! 🎉 กรุณาเข้าสู่ระบบ');
     $('loginUser').value = username;
     switchAuthTab('login');
   } catch (e) { toast('สมัครไม่สำเร็จ: ' + e.message); }
 }
 
-/* ── Logout ──────────────────────────────────────── */
+/* ════════════════════════════════════════════════════
+   LOGOUT — 2-step confirmation
+════════════════════════════════════════════════════ */
+function askLogout() { openModal('modal-logout'); }
+
 async function doLogout() {
-  try { await api('/auth/logout', {method: 'POST'}); } catch {}
+  closeModal('modal-logout');
+  closeModal('modal-idle');
+  stopIdle();
+  try { await api('/auth/logout', {method:'POST'}); } catch {}
   TOKEN = null; ROLE = null;
   localStorage.removeItem('promjai_token');
   localStorage.removeItem('promjai_role');
   $('main-app').classList.add('hidden');
   $('login-screen').classList.remove('hidden');
+  $('help-fab').classList.remove('visible');
 }
 
-/* ── Show main app ───────────────────────────────── */
+/* ════════════════════════════════════════════════════
+   BOTTOM NAV — build dynamically per role
+════════════════════════════════════════════════════ */
+const NAV_ELDERLY = [
+  { tab:'recommend',  icon:'🎯', label:'แนะนำ' },
+  { tab:'caretaker',  icon:'👥', label:'ผู้ดูแล' },
+  { tab:'qol',        icon:'📈', label:'คุณภาพ' },
+];
+const NAV_CARETAKER = [
+  { tab:'my-bookings',    icon:'📋', label:'งานของฉัน' },
+  { tab:'all-caretakers', icon:'📂', label:'ทั้งหมด' },
+  { tab:'profile',        icon:'👤', label:'โปรไฟล์' },
+];
+function buildBottomNav(items) {
+  const nav = $('bottom-nav');
+  nav.innerHTML = '';
+  items.forEach(item => {
+    const btn = document.createElement('button');
+    btn.dataset.tab = item.tab;
+    btn.setAttribute('aria-label', item.label);
+    btn.setAttribute('aria-current', 'false');
+    btn.innerHTML = `<span class="nav-icon" aria-hidden="true">${item.icon}</span>${esc(item.label)}`;
+    btn.addEventListener('click', () => showTab(item.tab));
+    nav.appendChild(btn);
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   SHOW MAIN APP + ONBOARDING
+════════════════════════════════════════════════════ */
 function showMainApp() {
   $('login-screen').classList.add('hidden');
   $('main-app').classList.remove('hidden');
-  $('role-badge').textContent = ROLE === 'elderly' ? 'ผู้สูงอายุ' : 'ผู้ดูแล';
+  $('help-fab').classList.add('visible');
+  $('role-badge').textContent = ROLE === 'elderly' ? '👴 ผู้สูงอายุ' : '🏥 ผู้ดูแล';
+  $('role-badge').setAttribute('aria-label', ROLE === 'elderly' ? 'บทบาท: ผู้สูงอายุ' : 'บทบาท: ผู้ดูแล');
   _recsLoaded = false;
+
   if (ROLE === 'elderly') {
-    $('elderly-tabs').classList.remove('hidden');
-    $('caretaker-tabs').classList.add('hidden');
+    buildBottomNav(NAV_ELDERLY);
     showTab('recommend');
     loadQolHistory();
   } else {
-    $('elderly-tabs').classList.add('hidden');
-    $('caretaker-tabs').classList.remove('hidden');
+    buildBottomNav(NAV_CARETAKER);
     showTab('my-bookings');
     loadProfile();
   }
+  startIdle();
+  maybeShowTour();
 }
 
-/* ── Tab navigation ──────────────────────────────── */
+/* ════════════════════════════════════════════════════
+   TAB NAVIGATION
+════════════════════════════════════════════════════ */
 function showTab(name) {
   document.querySelectorAll('.tab-pane').forEach(s => s.classList.add('hidden'));
-  $('tab-' + name).classList.remove('hidden');
-  document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
-  const btn = document.querySelector(`[data-tab="${CSS.escape(name)}"]`);
-  if (btn) btn.classList.add('active');
+  const pane = $('tab-' + name);
+  if (pane) { pane.classList.remove('hidden'); pane.focus && pane.setAttribute('tabindex','-1'); }
+
+  document.querySelectorAll('#bottom-nav button').forEach(b => {
+    const active = b.dataset.tab === name;
+    b.classList.toggle('active', active);
+    b.setAttribute('aria-current', active ? 'page' : 'false');
+  });
+
   if (name === 'recommend')      loadRecommendations();
   if (name === 'qol')            loadQolHistory();
   if (name === 'my-bookings')    loadBookings();
   if (name === 'profile')        loadProfile();
   if (name === 'all-caretakers') loadAllCaretakers();
 }
-document.querySelectorAll('.tabs button').forEach(b => {
-  b.addEventListener('click', () => showTab(b.dataset.tab));
+
+/* ════════════════════════════════════════════════════
+   IDLE DETECTION — 5 min + warning modal
+════════════════════════════════════════════════════ */
+let _idleTimer = null, _warnTimer = null, _countdownTimer = null;
+const IDLE_MS   = 5 * 60 * 1000;  // 5 minutes
+const WARN_SEC  = 60;              // 60 seconds to respond
+
+function resetIdle() {
+  closeModal('modal-idle');
+  clearTimeout(_warnTimer);
+  clearInterval(_countdownTimer);
+  startIdle();
+}
+function startIdle() {
+  stopIdle();
+  _idleTimer = setTimeout(showIdleWarning, IDLE_MS);
+}
+function stopIdle() {
+  clearTimeout(_idleTimer);
+  clearTimeout(_warnTimer);
+  clearInterval(_countdownTimer);
+}
+function showIdleWarning() {
+  openModal('modal-idle');
+  let sec = WARN_SEC;
+  $('idle-countdown').textContent = sec;
+  _countdownTimer = setInterval(() => {
+    sec--;
+    $('idle-countdown').textContent = sec;
+    if (sec <= 0) { clearInterval(_countdownTimer); doLogout(); }
+  }, 1000);
+}
+// Reset idle on any user interaction
+['mousemove','keypress','touchstart','scroll','click'].forEach(evt => {
+  document.addEventListener(evt, () => { if (TOKEN) startIdle(); }, { passive: true });
 });
 
-/* ── Recommendations ─────────────────────────────── */
+/* ════════════════════════════════════════════════════
+   ONBOARDING TOUR — 4 steps
+════════════════════════════════════════════════════ */
+const TOUR_STEPS = [
+  {
+    icon: '🤝',
+    title: 'ยินดีต้อนรับสู่พร้อมใจ ใกล้บ้าน!',
+    text:  'แอปนี้ช่วยให้คุณหาผู้ดูแลที่เหมาะสมและติดตามคุณภาพชีวิตของคุณ ใช้เวลาแค่ 1 นาทีก็เข้าใจทั้งหมด',
+  },
+  {
+    icon: '🎯',
+    title: 'กิจกรรมแนะนำ',
+    text:  'AI จะแนะนำกิจกรรมที่เหมาะกับคุณ กดปุ่ม 👍 ชอบ หรือ 👌 พอใช้ เพื่อให้ระบบเรียนรู้ความชอบของคุณ',
+  },
+  {
+    icon: '👥',
+    title: 'ค้นหาผู้ดูแล',
+    text:  'กดแถบ "ผู้ดูแล" แล้วกด "ค้นหาตอนนี้" ระบบจะหาผู้ดูแลในรัศมี 50 กม. จากที่อยู่ของคุณ',
+  },
+  {
+    icon: '📈',
+    title: 'บันทึกคุณภาพชีวิต',
+    text:  'ไปที่แถบ "คุณภาพ" แล้วเลือกอิโมจิที่ตรงกับความรู้สึกของคุณในแต่ละด้าน กดบันทึกทุกวันเพื่อติดตามแนวโน้ม',
+  },
+];
+let _tourStep = 0;
+
+function maybeShowTour() {
+  if (localStorage.getItem('promjai_tour_done')) return;
+  _tourStep = 0;
+  renderTourStep();
+  openModal('modal-tour');
+}
+function renderTourStep() {
+  const s = TOUR_STEPS[_tourStep];
+  $('tour-content').innerHTML = `
+    <div style="font-size:52px; margin-bottom:12px;">${s.icon}</div>
+    <h3 style="color:var(--primary); margin:0 0 10px;">${esc(s.title)}</h3>
+    <p style="color:var(--muted); margin:0; font-size:calc(var(--font-base) - 2px);">${esc(s.text)}</p>
+  `;
+  // Dots
+  const dots = $('tour-dots');
+  dots.innerHTML = TOUR_STEPS.map((_, i) =>
+    `<div class="tour-dot${i === _tourStep ? ' active' : ''}" aria-hidden="true"></div>`
+  ).join('');
+  // Button label
+  $('tour-next-btn').textContent =
+    _tourStep < TOUR_STEPS.length - 1 ? 'ถัดไป →' : '✓ เริ่มใช้งาน';
+  $('mtour-title').textContent = `ขั้นตอน ${_tourStep + 1}/${TOUR_STEPS.length}`;
+}
+function nextTourStep() {
+  if (_tourStep < TOUR_STEPS.length - 1) {
+    _tourStep++;
+    renderTourStep();
+  } else {
+    skipTour();
+  }
+}
+function skipTour() {
+  localStorage.setItem('promjai_tour_done', '1');
+  closeModal('modal-tour');
+}
+
+/* ════════════════════════════════════════════════════
+   EMOJI SCALE (QoL)
+════════════════════════════════════════════════════ */
+function setQol(domain, val) {
+  $(domain).value = val;
+  document.querySelectorAll(`[data-domain="${domain}"]`).forEach(btn => {
+    const selected = parseInt(btn.dataset.val) === val;
+    btn.classList.toggle('selected', selected);
+    btn.setAttribute('aria-pressed', selected ? 'true' : 'false');
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   RECOMMENDATIONS
+════════════════════════════════════════════════════ */
 let _recsLoaded = false;
 async function loadRecommendations() {
   if (_recsLoaded) return;
   _recsLoaded = true;
-  $('rec-list').innerHTML = 'กำลังโหลดคำแนะนำ...';
+  $('rec-list').innerHTML = '<div class="list-empty">กำลังโหลดคำแนะนำ...</div>';
   try {
     const r = await api('/recommendations?top_k=8');
     if (!r.recommendations.length) {
-      $('rec-list').innerHTML = '<div class="list-empty">ยังไม่มีคำแนะนำ</div>';
+      $('rec-list').innerHTML = `
+        <div class="empty-cta">
+          <span class="icon">🎯</span>
+          <h3>ยังไม่มีคำแนะนำ</h3>
+          <p>ระบบจะแนะนำกิจกรรมเมื่อมีข้อมูลเพียงพอ</p>
+        </div>`;
       return;
     }
     $('rec-list').innerHTML = r.recommendations.map((rec, i) => `
       <div class="card">
-        <div class="row" style="justify-content:space-between;">
-          <div><b>${i+1}. ${esc(rec.name)}</b></div>
-          <span class="badge green">คะแนน ${esc(rec.score.toFixed(2))}</span>
+        <div class="row" style="justify-content:space-between; flex-wrap:wrap; gap:6px;">
+          <b>${i+1}. ${esc(rec.name)}</b>
+          <span class="badge green" aria-label="คะแนนแนะนำ ${rec.score.toFixed(2)}">
+            ⭐ ${esc(rec.score.toFixed(2))}
+          </span>
         </div>
-        <div class="muted" style="margin-top:4px;">${esc(rec.description)}</div>
-        <div class="row" style="margin-top:10px;gap:8px;">
-          <span class="tag">หมวด: ${esc(rec.category)}</span>
+        <div class="muted" style="margin-top:6px;">${esc(rec.description)}</div>
+        <div class="row" style="margin-top:10px; gap:6px; flex-wrap:wrap;">
+          <span class="tag">📁 ${esc(rec.category)}</span>
           <span class="tag">${esc(rec.difficulty)}</span>
           <span class="tag">⏱ ${esc(rec.duration_min)} นาที</span>
           <span class="tag">🧠 benefit ${esc(rec.cognitive_benefit)}</span>
         </div>
-        <div class="score-bar">
+        <div class="score-bar" aria-hidden="true">
           <div style="width:${Math.min(100, rec.score * 100)}%;"></div>
         </div>
-        <div class="row" style="margin-top:12px;">
+        <div class="row" style="margin-top:14px; gap:8px; flex-wrap:wrap;">
           <button class="icon-btn"
                   data-aid="${esc(rec.activity_id)}" data-r="5"
-                  onclick="rateActivity(this)">👍 ชอบมาก</button>
+                  onclick="rateActivity(this)"
+                  aria-label="ชอบมาก กิจกรรม ${esc(rec.name)}">👍 ชอบมาก</button>
           <button class="icon-btn secondary"
                   data-aid="${esc(rec.activity_id)}" data-r="3"
-                  onclick="rateActivity(this)">👌 พอใช้</button>
+                  onclick="rateActivity(this)"
+                  aria-label="พอใช้ กิจกรรม ${esc(rec.name)}">👌 พอใช้</button>
           <button class="icon-btn secondary"
                   data-aid="${esc(rec.activity_id)}"
-                  onclick="explainActivity(this)">❓ ทำไม?</button>
+                  data-name="${esc(rec.name)}"
+                  onclick="explainActivity(this)"
+                  aria-label="ทำไมถึงแนะนำกิจกรรม ${esc(rec.name)}">❓ ทำไม?</button>
         </div>
       </div>
     `).join('');
@@ -665,57 +1518,74 @@ async function rateActivity(btn) {
   const aid    = parseInt(btn.dataset.aid);
   const rating = parseInt(btn.dataset.r);
   try {
-    await api('/feedback', {method: 'POST', body: JSON.stringify({activity_id: aid, rating})});
+    await api('/feedback', {method:'POST', body:JSON.stringify({activity_id:aid, rating})});
     toast('บันทึกความคิดเห็นแล้ว — ขอบคุณค่ะ 🙏');
+    btn.disabled = true;
   } catch (e) { toast('ผิดพลาด: ' + e.message); }
 }
 
 async function explainActivity(btn) {
-  const aid = parseInt(btn.dataset.aid);
+  const aid  = parseInt(btn.dataset.aid);
+  const name = btn.dataset.name || '';
   try {
     const r = await api('/explain/' + aid);
-    alert('🔍 เหตุผลที่แนะนำ "' + r.activity + '"\n\n' + r.explanation.join('\n'));
+    $('mexplain-title').textContent = `🔍 ทำไมถึงแนะนำ "${r.activity || name}"?`;
+    $('mexplain-body').innerHTML = r.explanation.map(line =>
+      `<p style="margin:6px 0;">• ${esc(line)}</p>`
+    ).join('');
+    openModal('modal-explain');
   } catch (e) { toast('ผิดพลาด: ' + e.message); }
 }
 
-/* ── Caretaker search (elderly side) ─────────────── */
+/* ════════════════════════════════════════════════════
+   CARETAKER SEARCH (elderly side)
+════════════════════════════════════════════════════ */
 async function loadCaretakers() {
-  $('caretaker-list').innerHTML = 'กำลังค้นหา...';
+  $('caretaker-list').innerHTML = '<div class="list-empty">กำลังค้นหา...</div>';
   $('location-setup').classList.add('hidden');
   try {
     const r = await api('/caretakers/match?top_k=5&max_km=50');
     if (!r.matches.length) {
-      $('caretaker-list').innerHTML =
-        '<div class="list-empty">ไม่พบผู้ดูแลในรัศมี 50 กม.<br>ลองขยายรัศมีหรือรอผู้ดูแลใหม่สมัคร</div>';
+      $('caretaker-list').innerHTML = `
+        <div class="empty-cta">
+          <span class="icon">🔍</span>
+          <h3>ไม่พบผู้ดูแลในรัศมี 50 กม.</h3>
+          <p>ลองขยายรัศมีหรือรอผู้ดูแลใหม่สมัครในพื้นที่ของคุณ</p>
+        </div>`;
       return;
     }
     $('caretaker-list').innerHTML = r.matches.map(c => `
       <div class="card">
-        <div class="row" style="justify-content:space-between;">
-          <div>
+        <div class="row" style="justify-content:space-between; flex-wrap:wrap; gap:6px;">
+          <div class="row" style="gap:6px;">
             <b>${esc(c.name)}</b>
             ${c.source === 'registered'
-              ? '<span class="badge blue" style="margin-left:6px;font-size:12px;">🆕 ใหม่</span>'
+              ? '<span class="badge blue" style="font-size:12px;">🆕 ใหม่</span>'
               : ''}
           </div>
           <span class="badge ${c.verified === 'yes' ? 'green' : 'yellow'}">
-            ${c.verified === 'yes' ? '✓ รับรอง' : 'รอตรวจ'}
+            ${c.verified === 'yes' ? '✓ รับรอง' : '⏳ รอตรวจ'}
           </span>
         </div>
         <div class="kv">
-          <b>คะแนนรีวิว</b><span>⭐ ${esc(c.rating)} / 5</span>
-          <b>ระยะทาง</b><span>${esc(c.distance_km)} กม.</span>
-          <b>ค่าบริการ</b><span>${esc(c.hourly_rate)} บาท/ชม.</span>
-          <b>พื้นที่</b><span>อ.${esc(c.district)} จ.${esc(c.province)}</span>
-          <b>Match score</b><span>${esc((c.match_score * 100).toFixed(0))}%</span>
+          <b>⭐ คะแนน</b><span>${esc(c.rating)} / 5</span>
+          <b>📍 ระยะทาง</b><span>${esc(c.distance_km)} กม.</span>
+          <b>💰 ค่าบริการ</b><span>${esc(c.hourly_rate)} บาท/ชม.</span>
+          <b>📌 พื้นที่</b><span>อ.${esc(c.district)} จ.${esc(c.province)}</span>
+          <b>🎯 ความเหมาะสม</b><span>${esc((c.match_score * 100).toFixed(0))}%</span>
         </div>
-        <div style="margin-top:6px;">
+        <div style="margin:6px 0;">
           ${c.skills.map(s => `<span class="tag">${esc(s)}</span>`).join('')}
         </div>
-        <button style="margin-top:12px;"
+        <button style="margin-top:12px; width:100%;"
                 data-cid="${esc(c.caretaker_id)}"
+                data-name="${esc(c.name)}"
+                data-rate="${esc(c.hourly_rate)}"
                 data-svc="${esc(c.skills[0] || 'ดูแลผู้สูงอายุ')}"
-                onclick="bookFromBtn(this)">📅 จองบริการ</button>
+                onclick="askBook(this)"
+                aria-label="จองบริการกับ ${esc(c.name)} ค่าบริการ ${esc(c.hourly_rate)} บาทต่อชั่วโมง">
+          📅 จองบริการ
+        </button>
       </div>
     `).join('');
   } catch (e) {
@@ -733,28 +1603,61 @@ async function saveLocation() {
   const province = $('locProvince').value.trim();
   if (!province) { toast('กรุณากรอกจังหวัด'); return; }
   try {
-    await api('/profile', {method: 'PUT', body: JSON.stringify({province})});
+    await api('/profile', {method:'PUT', body:JSON.stringify({province})});
     toast('บันทึกที่อยู่เรียบร้อย ✓');
     $('location-setup').classList.add('hidden');
     loadCaretakers();
   } catch (e) { toast('ผิดพลาด: ' + e.message); }
 }
 
-function bookFromBtn(btn) {
-  book(parseInt(btn.dataset.cid), btn.dataset.svc);
+/* ── 2-step booking confirmation ──────────────────── */
+let _pendingBook = null;
+
+function askBook(btn) {
+  _pendingBook = {
+    cid:     parseInt(btn.dataset.cid),
+    service: btn.dataset.svc,
+  };
+  $('mbooking-body').innerHTML = `
+    <div class="kv" style="margin:0;">
+      <b>👤 ผู้ดูแล</b><span>${esc(btn.dataset.name)}</span>
+      <b>🛠 บริการ</b><span>${esc(btn.dataset.svc)}</span>
+      <b>💰 ค่าบริการ</b>
+      <span style="font-size:1.1em; font-weight:700; color:var(--primary);">
+        ${esc(btn.dataset.rate)} บาท/ชม.
+      </span>
+    </div>
+    <p class="muted" style="margin-top:14px; font-size:15px;">
+      หลังจองผู้ดูแลจะได้รับการแจ้งเตือนและต้องยืนยันรับงานก่อน
+    </p>
+  `;
+  openModal('modal-booking');
 }
 
-async function book(cid, service) {
+async function doConfirmBooking() {
+  if (!_pendingBook) return;
+  $('mbooking-confirm').disabled = true;
   try {
     await api('/bookings', {
       method: 'POST',
-      body: JSON.stringify({caretaker_id: cid, service_type: service}),
+      body: JSON.stringify({
+        caretaker_id: _pendingBook.cid,
+        service_type: _pendingBook.service,
+      }),
     });
+    closeModal('modal-booking');
     toast('จองสำเร็จ! รอผู้ดูแลยืนยัน 📅');
-  } catch (e) { toast('ผิดพลาด: ' + e.message); }
+    _pendingBook = null;
+  } catch (e) {
+    toast('ผิดพลาด: ' + e.message);
+  } finally {
+    $('mbooking-confirm').disabled = false;
+  }
 }
 
-/* ── QoL ─────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════
+   QOL
+════════════════════════════════════════════════════ */
 async function saveQol() {
   const body = {
     physical:      +$('qol-phys').value,
@@ -763,8 +1666,8 @@ async function saveQol() {
     environment:   +$('qol-env').value,
   };
   try {
-    const r = await api('/whoqol', {method: 'POST', body: JSON.stringify(body)});
-    toast('บันทึกแล้ว — คะแนนรวม: ' + r.overall);
+    const r = await api('/whoqol', {method:'POST', body:JSON.stringify(body)});
+    toast(`บันทึกแล้ว 🎉 คะแนนรวม: ${r.overall}`);
     loadQolHistory();
   } catch (e) { toast('ผิดพลาด: ' + e.message); }
 }
@@ -772,12 +1675,24 @@ async function saveQol() {
 async function loadQolHistory() {
   try {
     const rows = await api('/whoqol/history');
-    if (!rows.length) { $('qol-history').innerHTML = 'ยังไม่มีบันทึก'; return; }
+    if (!rows.length) {
+      $('qol-history').innerHTML = `
+        <div class="empty-cta">
+          <span class="icon">📋</span>
+          <h3>ยังไม่มีบันทึก</h3>
+          <p>กดบันทึกเพื่อเริ่มติดตามคุณภาพชีวิต</p>
+        </div>`;
+      return;
+    }
     $('qol-history').innerHTML = rows.slice(-5).reverse().map(r => `
-      <div class="kv" style="border-bottom:1px dashed var(--border);padding-bottom:8px;">
-        <b>${esc(r.recorded_at.slice(0, 16).replace('T', ' '))}</b>
-        <span>กาย ${esc(r.physical)} | ใจ ${esc(r.psychological)} |
-          สังคม ${esc(r.social)} | สภาพแวดล้อม ${esc(r.environment)}</span>
+      <div class="kv" style="border-bottom:1px dashed var(--border); padding-bottom:10px; margin-bottom:6px;">
+        <b>${esc(r.recorded_at.slice(0,16).replace('T',' '))}</b>
+        <span>
+          🏃 ${esc(r.physical)} &nbsp;
+          🧠 ${esc(r.psychological)} &nbsp;
+          👥 ${esc(r.social)} &nbsp;
+          🌳 ${esc(r.environment)}
+        </span>
       </div>
     `).join('');
   } catch (e) {
@@ -786,25 +1701,28 @@ async function loadQolHistory() {
   }
 }
 
-/* ── Bookings (caretaker view) ───────────────────── */
+/* ════════════════════════════════════════════════════
+   BOOKINGS (caretaker view)
+════════════════════════════════════════════════════ */
 const STATUS_LABEL = {
-  pending:   'รอยืนยัน',
-  confirmed: 'ยืนยันแล้ว',
-  completed: 'เสร็จสิ้น',
-  cancelled: 'ยกเลิก',
+  pending:'รอยืนยัน', confirmed:'ยืนยันแล้ว',
+  completed:'เสร็จสิ้น', cancelled:'ยกเลิก',
 };
 const STATUS_CLASS = {
-  pending:   'yellow',
-  confirmed: 'green',
-  completed: 'blue',
-  cancelled: 'red',
+  pending:'yellow', confirmed:'green',
+  completed:'blue', cancelled:'red',
 };
 
 async function loadBookings() {
   try {
     const rows = await api('/bookings');
     if (!rows.length) {
-      $('caretaker-bookings').innerHTML = '<div class="list-empty">ยังไม่มีงาน</div>';
+      $('caretaker-bookings').innerHTML = `
+        <div class="empty-cta">
+          <span class="icon">📋</span>
+          <h3>ยังไม่มีงาน</h3>
+          <p>เมื่อผู้สูงอายุจองบริการจะปรากฏที่นี่</p>
+        </div>`;
       return;
     }
     $('caretaker-bookings').innerHTML = rows.map(r => {
@@ -813,30 +1731,39 @@ async function loadBookings() {
       const cls   = STATUS_CLASS[s] || 'yellow';
       const actions =
         s === 'pending' ? `
-          <div class="row" style="margin-top:10px;gap:8px;">
+          <div class="row" style="margin-top:12px; gap:8px; flex-wrap:wrap;">
             <button class="icon-btn success"
                     data-bid="${esc(r.id)}" data-st="confirmed"
-                    onclick="updateStatus(this)">✓ ยืนยันรับงาน</button>
+                    onclick="updateStatus(this)"
+                    aria-label="ยืนยันรับงานจาก ${esc(r.elderly_name || '')}">
+              ✓ ยืนยันรับงาน
+            </button>
             <button class="icon-btn danger"
                     data-bid="${esc(r.id)}" data-st="cancelled"
-                    onclick="updateStatus(this)">✗ ปฏิเสธ</button>
+                    onclick="updateStatus(this)"
+                    aria-label="ปฏิเสธงานจาก ${esc(r.elderly_name || '')}">
+              ✗ ปฏิเสธ
+            </button>
           </div>` :
         s === 'confirmed' ? `
-          <div class="row" style="margin-top:10px;gap:8px;">
+          <div class="row" style="margin-top:12px;">
             <button class="icon-btn success"
                     data-bid="${esc(r.id)}" data-st="completed"
-                    onclick="updateStatus(this)">✓ งานเสร็จสิ้น</button>
+                    onclick="updateStatus(this)"
+                    aria-label="ทำเครื่องหมายว่างานเสร็จสิ้น">
+              ✓ งานเสร็จสิ้น
+            </button>
           </div>` : '';
       return `
         <div class="card">
-          <div class="row" style="justify-content:space-between;">
+          <div class="row" style="justify-content:space-between; flex-wrap:wrap; gap:6px;">
             <b>${esc(r.elderly_name || 'ผู้ใช้ #' + r.elderly_id)}</b>
-            <span class="badge ${cls}">${label}</span>
+            <span class="badge ${cls}" aria-label="สถานะ ${label}">${label}</span>
           </div>
           <div class="kv">
-            <b>บริการ</b><span>${esc(r.service_type)}</span>
-            <b>วันเวลา</b><span>${esc(r.scheduled_at || '-')}</span>
-            <b>สร้างเมื่อ</b><span>${esc((r.created_at || '').slice(0,16))}</span>
+            <b>🛠 บริการ</b><span>${esc(r.service_type)}</span>
+            <b>📅 วันเวลา</b><span>${esc(r.scheduled_at || '-')}</span>
+            <b>🕐 สร้างเมื่อ</b><span>${esc((r.created_at || '').slice(0,16))}</span>
           </div>
           ${actions}
         </div>`;
@@ -850,6 +1777,7 @@ async function loadBookings() {
 async function updateStatus(btn) {
   const bid = parseInt(btn.dataset.bid);
   const st  = btn.dataset.st;
+  btn.disabled = true;
   try {
     await api(`/bookings/${bid}/status`, {
       method: 'PATCH',
@@ -857,16 +1785,26 @@ async function updateStatus(btn) {
     });
     toast('อัปเดตสถานะเรียบร้อย ✓');
     loadBookings();
-  } catch (e) { toast('ผิดพลาด: ' + e.message); }
+  } catch (e) {
+    btn.disabled = false;
+    toast('ผิดพลาด: ' + e.message);
+  }
 }
 
-/* ── All caretakers (caretaker view) ─────────────── */
+/* ════════════════════════════════════════════════════
+   ALL CARETAKERS (caretaker view)
+════════════════════════════════════════════════════ */
 async function loadAllCaretakers() {
-  $('all-caretakers-list').innerHTML = 'กำลังโหลด...';
+  $('all-caretakers-list').innerHTML = '<div class="list-empty">กำลังโหลด...</div>';
   try {
     const r = await api('/caretakers');
     if (!r.caretakers.length) {
-      $('all-caretakers-list').innerHTML = '<div class="list-empty">ยังไม่มีผู้ดูแล</div>';
+      $('all-caretakers-list').innerHTML = `
+        <div class="empty-cta">
+          <span class="icon">📂</span>
+          <h3>ยังไม่มีผู้ดูแล</h3>
+          <p>ยังไม่มีข้อมูลผู้ดูแลในระบบ</p>
+        </div>`;
       return;
     }
     $('all-caretakers-list').innerHTML = r.caretakers.map(c => {
@@ -879,24 +1817,23 @@ async function loadAllCaretakers() {
         : '<span class="badge green">🆕 ใหม่</span>';
       return `
         <div class="card">
-          <div class="row" style="justify-content:space-between;gap:6px;flex-wrap:wrap;">
+          <div class="row" style="justify-content:space-between; gap:6px; flex-wrap:wrap;">
             <b>${esc(c.name)}</b>
             <div class="row" style="gap:4px;">${srcBadge} ${verBadge}</div>
           </div>
           <div class="kv">
-            <b>คะแนน</b><span>${c.rating !== null && c.rating !== undefined
-              ? '⭐ ' + esc(c.rating)
-              : '— (ยังไม่มีรีวิว)'}</span>
-            <b>ค่าบริการ</b><span>${c.hourly_rate
-              ? esc(c.hourly_rate) + ' บาท/ชม.'
-              : '-'}</span>
-            <b>พื้นที่</b><span>${esc(c.province || '-')}</span>
-            ${c.source === 'registered' ? `
-              <b>พิกัด</b>
-              <span>${c.has_location ? '✓ มีพิกัด (ค้นหาได้)' : '✗ ไม่มีพิกัด'}</span>
-            ` : ''}
+            <b>⭐ คะแนน</b>
+            <span>${c.rating !== null && c.rating !== undefined
+              ? esc(c.rating) : '— (ยังไม่มีรีวิว)'}</span>
+            <b>💰 ค่าบริการ</b>
+            <span>${c.hourly_rate ? esc(c.hourly_rate) + ' บาท/ชม.' : '-'}</span>
+            <b>📌 พื้นที่</b><span>${esc(c.province || '-')}</span>
+            ${c.source === 'registered'
+              ? `<b>📍 พิกัด</b>
+                 <span>${c.has_location ? '✓ มีพิกัด (ค้นหาได้)' : '✗ ไม่มีพิกัด'}</span>`
+              : ''}
           </div>
-          <div style="margin-top:4px;">
+          <div style="margin-top:6px;">
             ${(c.skills || []).filter(s => s).map(s =>
               `<span class="tag">${esc(s)}</span>`
             ).join('')}
@@ -909,43 +1846,43 @@ async function loadAllCaretakers() {
   }
 }
 
-/* ── Profile (caretaker view + edit form) ─────────── */
+/* ════════════════════════════════════════════════════
+   PROFILE (caretaker)
+════════════════════════════════════════════════════ */
 async function loadProfile() {
   try {
     const me = await api('/me');
-    const count = me.rating_count || me.completed_jobs;
     $('caretaker-profile').innerHTML = `
       <div class="kv">
-        <b>ชื่อ</b><span>${esc(me.name || '-')}</span>
-        <b>คะแนน</b><span>⭐ ${me.rating !== null && me.rating !== undefined
-          ? esc(me.rating)
-          : '— (ยังไม่มีรีวิว)'} / 5</span>
-        <b>การรับรอง</b>
-        <span>${me.verified === 'yes'
-          ? '<span class="badge green">✓ รับรองแล้ว</span>'
-          : me.verified === 'pending'
-            ? '<span class="badge yellow">⏳ รอตรวจสอบ</span>'
-            : '<span class="badge red">ยังไม่รับรอง</span>'}</span>
-        <b>งานที่เสร็จ</b><span>${esc(me.completed_jobs ?? me.rating_count ?? '-')}</span>
-        <b>ค่าบริการ</b><span>${esc(me.hourly_rate ?? '-')} บาท/ชม.</span>
-        <b>พื้นที่</b>
+        <b>👤 ชื่อ</b><span>${esc(me.name || '-')}</span>
+        <b>⭐ คะแนน</b>
+        <span>${me.rating !== null && me.rating !== undefined
+          ? esc(me.rating) + ' / 5' : '— (ยังไม่มีรีวิว)'}</span>
+        <b>🏅 การรับรอง</b>
+        <span>${
+          me.verified === 'yes'     ? '<span class="badge green">✓ รับรองแล้ว</span>'  :
+          me.verified === 'pending' ? '<span class="badge yellow">⏳ รอตรวจสอบ</span>' :
+                                     '<span class="badge red">ยังไม่รับรอง</span>'
+        }</span>
+        <b>📋 งานที่เสร็จ</b><span>${esc(me.completed_jobs ?? me.rating_count ?? '-')}</span>
+        <b>💰 ค่าบริการ</b><span>${esc(me.hourly_rate ?? '-')} บาท/ชม.</span>
+        <b>📌 พื้นที่</b>
         <span>อ.${esc(me.district || '-')} จ.${esc(me.province || '-')}</span>
-        ${me.lat ? `<b>พิกัด</b><span>${esc(me.lat)}, ${esc(me.lon)} ✓</span>` : ''}
-        ${me.bio ? `<b>แนะนำตัว</b><span>${esc(me.bio)}</span>` : ''}
+        ${me.lat ? `<b>📍 พิกัด</b><span>${esc(me.lat)}, ${esc(me.lon)} ✓</span>` : ''}
+        ${me.bio ? `<b>✍️ แนะนำตัว</b><span>${esc(me.bio)}</span>` : ''}
       </div>
-      <div style="margin-top:8px;">
+      <div style="margin-top:10px;">
         ${(me.skills || []).map(s => `<span class="tag">${esc(s)}</span>`).join('')}
       </div>
     `;
-    // Pre-fill edit form
-    if (me.skills)      $('editSkills').value   = Array.isArray(me.skills) ? me.skills.join('|') : me.skills;
-    if (me.hourly_rate) $('editRate').value      = me.hourly_rate;
-    if (me.province)    $('editProvince').value  = me.province;
-    if (me.district)    $('editDistrict').value  = me.district;
-    if (me.phone)       $('editPhone').value     = me.phone;
-    if (me.bio)         $('editBio').value       = me.bio;
-    if (me.lat)         $('editLat').value       = me.lat;
-    if (me.lon)         $('editLon').value       = me.lon;
+    if (me.skills)      $('editSkills').value  = Array.isArray(me.skills) ? me.skills.join('|') : me.skills;
+    if (me.hourly_rate) $('editRate').value     = me.hourly_rate;
+    if (me.province)    $('editProvince').value = me.province;
+    if (me.district)    $('editDistrict').value = me.district;
+    if (me.phone)       $('editPhone').value    = me.phone;
+    if (me.bio)         $('editBio').value      = me.bio;
+    if (me.lat)         $('editLat').value      = me.lat;
+    if (me.lon)         $('editLon').value      = me.lon;
   } catch (e) {
     $('caretaker-profile').innerHTML =
       `<div class="list-empty">ผิดพลาด: ${esc(e.message)}</div>`;
@@ -954,35 +1891,37 @@ async function loadProfile() {
 
 async function saveProfile() {
   const body = {};
-  const skills    = $('editSkills').value.trim();
-  const rate      = $('editRate').value;
-  const province  = $('editProvince').value.trim();
-  const district  = $('editDistrict').value.trim();
-  const phone     = $('editPhone').value.trim();
-  const bio       = $('editBio').value.trim();
-  const latStr    = $('editLat').value.trim();
-  const lonStr    = $('editLon').value.trim();
+  const skills   = $('editSkills').value.trim();
+  const rate     = $('editRate').value;
+  const province = $('editProvince').value.trim();
+  const district = $('editDistrict').value.trim();
+  const phone    = $('editPhone').value.trim();
+  const bio      = $('editBio').value.trim();
+  const latStr   = $('editLat').value.trim();
+  const lonStr   = $('editLon').value.trim();
 
-  if (skills)                    body.skills      = skills;
-  if (rate !== '')               body.hourly_rate  = parseFloat(rate);
-  if (province)                  body.province    = province;
-  if (district)                  body.district    = district;
-  if (phone)                     body.phone       = phone;
-  if (bio)                       body.bio         = bio;
-  if (latStr !== '')             body.lat         = parseFloat(latStr);
-  if (lonStr !== '')             body.lon         = parseFloat(lonStr);
+  if (skills)    body.skills      = skills;
+  if (rate)      body.hourly_rate  = parseFloat(rate);
+  if (province)  body.province    = province;
+  if (district)  body.district    = district;
+  if (phone)     body.phone       = phone;
+  if (bio)       body.bio         = bio;
+  if (latStr)    body.lat         = parseFloat(latStr);
+  if (lonStr)    body.lon         = parseFloat(lonStr);
 
   if (Object.keys(body).length === 0) {
     toast('กรุณากรอกข้อมูลที่ต้องการแก้ไข'); return;
   }
   try {
-    const r = await api('/profile', {method: 'PUT', body: JSON.stringify(body)});
+    const r = await api('/profile', {method:'PUT', body:JSON.stringify(body)});
     toast(`บันทึกสำเร็จ ✓ (อัปเดต: ${r.updated.join(', ')})`);
     loadProfile();
   } catch (e) { toast('ผิดพลาด: ' + e.message); }
 }
 
-/* ── Model info (login screen) ───────────────────── */
+/* ════════════════════════════════════════════════════
+   MODEL INFO (login screen)
+════════════════════════════════════════════════════ */
 async function loadModelInfo() {
   try {
     const m = await api('/metrics');
@@ -1003,7 +1942,21 @@ async function loadModelInfo() {
   } catch { $('model-info').textContent = 'ยังไม่ train โมเดล'; }
 }
 
-/* ── Session restore + token validation ──────────── */
+/* ════════════════════════════════════════════════════
+   RESTORE PREFERENCES + SESSION
+════════════════════════════════════════════════════ */
+(function restorePrefs() {
+  const savedFont = parseInt(localStorage.getItem('promjai_font') || '1');
+  setFont(savedFont);
+
+  const savedHC = parseInt(localStorage.getItem('promjai_hc') || '0');
+  if (savedHC) {
+    document.body.dataset.hc = '1';
+    $('hc-btn').classList.add('active');
+    $('hc-btn').setAttribute('aria-pressed','true');
+  }
+})();
+
 window.addEventListener('load', async () => {
   const savedToken = localStorage.getItem('promjai_token');
   const savedRole  = localStorage.getItem('promjai_role');
