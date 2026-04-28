@@ -1501,6 +1501,10 @@ async function loadRecommendations() {
                   onclick="rateActivity(this)"
                   aria-label="ไม่สนใจ กิจกรรม ${esc(rec.name)}">👎 ไม่สนใจ</button>
           <button class="icon-btn secondary"
+                  data-aid="${esc(rec.activity_id)}" data-r="3"
+                  onclick="rateActivity(this)"
+                  aria-label="เฉยๆ กิจกรรม ${esc(rec.name)}">😐 เฉยๆ</button>
+          <button class="icon-btn secondary"
                   data-aid="${esc(rec.activity_id)}"
                   data-name="${esc(rec.name)}"
                   onclick="explainActivity(this)"
