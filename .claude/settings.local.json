@@ -22,7 +22,10 @@
       "Read(//d//**)",
       "Bash(wslpath \"D:\\\\0-Cowork\\\\promjai-mvp\")",
       "PowerShell(Start-Process python -ArgumentList \"-m uvicorn backend.main:app --port 8003 --log-level warning\" -WorkingDirectory \"D:\\\\0-Cowork\\\\promjai-mvp\" -PassThru)",
-      "Bash(git -C D:\\\\0-Cowork\\\\promjai-mvp log --oneline -5)"
+      "Bash(git -C D:\\\\0-Cowork\\\\promjai-mvp log --oneline -5)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(gh pr *)"
     ]
   }
 }
