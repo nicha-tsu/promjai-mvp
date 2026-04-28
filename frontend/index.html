@@ -1495,16 +1495,16 @@ async function loadRecommendations() {
           <button class="icon-btn"
                   data-aid="${esc(rec.activity_id)}" data-r="5"
                   onclick="rateActivity(this)"
-                  aria-label="ชอบมาก กิจกรรม ${esc(rec.name)}">👍 ชอบมาก</button>
+                  aria-label="สนใจ กิจกรรม ${esc(rec.name)}">👍 สนใจ</button>
           <button class="icon-btn secondary"
-                  data-aid="${esc(rec.activity_id)}" data-r="3"
+                  data-aid="${esc(rec.activity_id)}" data-r="1"
                   onclick="rateActivity(this)"
-                  aria-label="พอใช้ กิจกรรม ${esc(rec.name)}">👌 พอใช้</button>
+                  aria-label="ไม่สนใจ กิจกรรม ${esc(rec.name)}">👎 ไม่สนใจ</button>
           <button class="icon-btn secondary"
                   data-aid="${esc(rec.activity_id)}"
                   data-name="${esc(rec.name)}"
                   onclick="explainActivity(this)"
-                  aria-label="ทำไมถึงแนะนำกิจกรรม ${esc(rec.name)}">❓ ทำไม?</button>
+                  aria-label="ดูเหตุผลที่แนะนำกิจกรรม ${esc(rec.name)}">🔍 เหตุผล</button>
         </div>
       </div>
     `).join('');
